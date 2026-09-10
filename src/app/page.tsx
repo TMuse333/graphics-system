@@ -1,69 +1,95 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from 'next/link';
+import { getAgents, getAgentStats, isDbConnected } from '@/lib/db';
+import { SeedButton } from '@/components/SeedButton';
+import { mockAgents, mockAgentStats } from '@/lib/mockData';
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default async function HomePage() {
+  const connected = await isDbConnected();
+
+  // Use mock data if not connected
+  const agents = connected ? await getAgents() : mockAgents;
+
+  const agentsWithStats = await Promise.all(
+    agents.map(async (agent) => {
+      const stats = connected
+        ? await getAgentStats(agent._id)
+        : mockAgentStats[agent._id] || { listings: 0, graphics: 0 };
+      return { ...agent, ...stats };
+    })
+  );
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <header className="header">
+        <Link href="/" className="header-logo">LISTING GRAPHICS</Link>
+        <nav className="header-nav">
+          <Link href="/gallery">Gallery</Link>
+        </nav>
+      </header>
+
+      {!connected && (
+        <div style={{
+          background: 'var(--accent)',
+          color: '#000',
+          padding: '8px 16px',
+          textAlign: 'center',
+          fontSize: '14px',
+          fontWeight: 500,
+        }}>
+          Demo Mode — MongoDB not connected. Add MONGODB_URI to .env.local
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      )}
+
+      <main className="page">
+        <div className="container">
+          <div className="flex-between mb-xl">
+            <div>
+              <h1 className="title">Your Clients</h1>
+              <p className="subtitle">Select a client to manage their listings and graphics</p>
+            </div>
+            <Link href="/agents/new" className="btn btn-primary">+ New Agent</Link>
+          </div>
+
+          {agents.length === 0 ? (
+            <div className="card" style={{ textAlign: 'center', padding: '60px' }}>
+              <p className="text-muted mb-md">No agents yet</p>
+              <Link href="/agents/new" className="btn btn-primary">Add Your First Client</Link>
+              <div style={{ marginTop: '16px' }}>
+                <SeedButton />
+              </div>
+            </div>
+          ) : (
+            <div className="grid-2">
+              {agentsWithStats.map((agent) => (
+                <Link key={agent._id} href={`/agents/${agent._id}`} className="card">
+                  <div className="card-row">
+                    <div className="avatar">
+                      {agent.headshotUrl && (
+                        <img src={agent.headshotUrl} alt={agent.name} />
+                      )}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>
+                        {agent.name}
+                      </h3>
+                      <p className="text-muted text-sm">{agent.title}</p>
+                      <p className="text-muted text-sm" style={{ marginTop: '8px' }}>
+                        {agent.listings} listings · {agent.graphics} graphics
+                      </p>
+                    </div>
+                    <div className="theme-swatches">
+                      <div className="theme-swatch" style={{ background: agent.theme.primary }} />
+                      <div className="theme-swatch" style={{ background: agent.theme.accent }} />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </main>
-    </div>
+    </>
   );
 }
