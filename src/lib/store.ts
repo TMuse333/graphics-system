@@ -2,7 +2,7 @@
 
 import type { Agent, Listing, Graphic, Photo, Package, PackageType } from './types';
 import { PACKAGE_LIMITS } from './types';
-import { greg, testAgent } from './theme';
+import { greg, testAgent, robertMusial } from './theme';
 
 // Storage keys
 const STORAGE_KEYS = {
@@ -13,7 +13,7 @@ const STORAGE_KEYS = {
 } as const;
 
 // Initial seed data
-const INITIAL_AGENTS: Agent[] = [greg, testAgent];
+const INITIAL_AGENTS: Agent[] = [greg, robertMusial, testAgent];
 
 const INITIAL_PACKAGES: Package[] = [
   {
@@ -28,6 +28,13 @@ const INITIAL_PACKAGES: Package[] = [
     agentId: 'greg-caseley',
     type: '16-pack',
     purchasedAt: '2026-08-04',
+    status: 'active',
+  },
+  {
+    _id: 'pkg-rm-8',
+    agentId: 'robert-musial',
+    type: '8-pack',
+    purchasedAt: '2026-09-08',
     status: 'active',
   },
 ];
@@ -235,6 +242,79 @@ const INITIAL_LISTINGS: Listing[] = [
     requestedVariants: ['new-listing'],
     createdAt: new Date('2026-08-30'),
     updatedAt: new Date('2026-09-09'),
+  },
+  // ========== ROBERT MUSIAL - PENDING LISTINGS ==========
+  {
+    _id: 'listing-rm-seaside',
+    agentId: 'robert-musial',
+    address: '156 Seaside Lane',
+    city: 'Summerside',
+    province: 'PE',
+    mls: '202609-01',
+    price: 425000,
+    propertyType: 'residential',
+    beds: 4,
+    baths: 2,
+    photos: [],
+    status: 'pending',
+    submittedAt: '2026-09-08',
+    requestedVariants: ['new-listing', 'open-house'],
+    createdAt: new Date('2026-09-08'),
+    updatedAt: new Date('2026-09-08'),
+  },
+  {
+    _id: 'listing-rm-harbour',
+    agentId: 'robert-musial',
+    address: '3 Harbour View Drive',
+    city: 'Charlottetown',
+    province: 'PE',
+    mls: '202609-02',
+    price: 549000,
+    propertyType: 'residential',
+    beds: 3,
+    baths: 2,
+    photos: [],
+    status: 'pending',
+    submittedAt: '2026-09-09',
+    requestedVariants: ['new-listing'],
+    createdAt: new Date('2026-09-09'),
+    updatedAt: new Date('2026-09-09'),
+  },
+  {
+    _id: 'listing-rm-queens',
+    agentId: 'robert-musial',
+    address: '88 Queen Street',
+    city: 'Charlottetown',
+    province: 'PE',
+    mls: '202609-03',
+    price: 389000,
+    propertyType: 'residential',
+    beds: 2,
+    baths: 1,
+    photos: [],
+    status: 'pending',
+    submittedAt: '2026-09-10',
+    requestedVariants: ['new-listing', 'price-drop'],
+    createdAt: new Date('2026-09-10'),
+    updatedAt: new Date('2026-09-10'),
+  },
+  {
+    _id: 'listing-rm-waterfront',
+    agentId: 'robert-musial',
+    address: '22 Waterfront Crescent',
+    city: 'Stratford',
+    province: 'PE',
+    mls: '202609-04',
+    price: 675000,
+    propertyType: 'residential',
+    beds: 5,
+    baths: 3,
+    photos: [],
+    status: 'in-progress',
+    submittedAt: '2026-09-11',
+    requestedVariants: ['new-listing', 'open-house', 'coming-soon'],
+    createdAt: new Date('2026-09-11'),
+    updatedAt: new Date('2026-09-11'),
   },
 ];
 

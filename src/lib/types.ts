@@ -145,3 +145,33 @@ export type TemplateProps = {
   };
   coAgent?: Agent;  // for dual-agent templates
 };
+
+// Bulk generation types
+export type GenerationQueueItem = {
+  agentId: string;
+  agent: Agent;
+  listings: {
+    listing: Listing;
+    selected: boolean;
+    variants: Variant[];
+  }[];
+  templates: string[];
+};
+
+export type GenerationJob = {
+  id: string;
+  agentId: string;
+  agentName: string;
+  listingId: string;
+  listingAddress: string;
+  templateId: string;
+  variant: Variant;
+  status: 'pending' | 'generating' | 'complete' | 'error';
+  graphicId?: string;
+};
+
+export type GenerationResult = {
+  agentId: string;
+  agentName: string;
+  graphics: Graphic[];
+};

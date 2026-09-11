@@ -24,6 +24,30 @@ export const greg: Agent = {
   theme: gregTheme,
 };
 
+// ============ ROBERT MUSIAL — RE/MAX blue + red ============
+
+export const remaxTheme: Theme = {
+  primary: '#003da5',
+  primaryAlt: '#002868',
+  accent: '#dc1c2e',
+  accentLight: '#f5a5ad',
+  fontDisplay: 'Archivo, sans-serif',
+  fontNarrow: '"Archivo Narrow", sans-serif',
+  fontScript: 'Yellowtail, cursive',
+};
+
+export const robertMusial: Agent = {
+  _id: 'robert-musial',
+  name: 'Robert Musial',
+  title: 'Realtor · RE/MAX Nova',
+  phone: '902-555-0199',
+  email: 'robert@remaxnova.ca',
+  website: 'remaxnova.ca',
+  headshotUrl: '',
+  logoUrl: '',
+  theme: remaxTheme,
+};
+
 // ============ TEST BRAND — clay + amber ============
 
 export const clayTheme: Theme = {

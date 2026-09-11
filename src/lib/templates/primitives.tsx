@@ -38,7 +38,7 @@ export function Hero({ photo }: { photo?: Photo }) {
         position: 'absolute',
         inset: 0,
         background: '#1e293b',
-        backgroundImage: photo ? `url("${photo.url}")` : undefined,
+        backgroundImage: photo?.url ? `url("${photo.url}")` : undefined,
         backgroundPosition: focalCss(photo),
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
@@ -366,21 +366,21 @@ export function AgentBand({
           </span>
         </div>
       </div>
-      {headshotUrl && (
-        <div
-          style={{
-            position: 'absolute',
-            right: -18,
-            bottom: -42,
-            width: 338,
-            height: 338,
-            borderRadius: '50%',
-            border: '7px solid var(--theme-accent)',
-            background: `#dfe3ea url("${headshotUrl}") center 8%/cover no-repeat`,
-            boxShadow: '0 16px 40px rgba(0,0,0,.5)',
-          }}
-        />
-      )}
+      <div
+        style={{
+          position: 'absolute',
+          right: -18,
+          bottom: -42,
+          width: 338,
+          height: 338,
+          borderRadius: '50%',
+          border: '7px solid var(--theme-accent)',
+          background: headshotUrl
+            ? `#dfe3ea url("${headshotUrl}") center 8%/cover no-repeat`
+            : '#ffffff',
+          boxShadow: '0 16px 40px rgba(0,0,0,.5)',
+        }}
+      />
     </div>
   );
 }

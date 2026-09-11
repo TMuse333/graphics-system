@@ -28,6 +28,7 @@ export default function HomePage() {
           <Link href="/" className="header-logo">LISTING GRAPHICS</Link>
           <nav className="header-nav">
             <Link href="/gallery">Gallery</Link>
+            <Link href="/generate">Generate</Link>
           </nav>
         </header>
         <main className="page">
@@ -45,6 +46,8 @@ export default function HomePage() {
         <Link href="/" className="header-logo">LISTING GRAPHICS</Link>
         <nav className="header-nav">
           <Link href="/gallery">Gallery</Link>
+          <Link href="/showcase">Showcase</Link>
+          <Link href="/generate">Generate</Link>
         </nav>
       </header>
 
@@ -55,7 +58,10 @@ export default function HomePage() {
               <h1 className="title">Your Clients</h1>
               <p className="subtitle">Select a client to manage their listings and graphics</p>
             </div>
-            <Link href="/agents/new" className="btn btn-primary">+ New Agent</Link>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <Link href="/generate" className="btn btn-secondary">Bulk Generate</Link>
+              <Link href="/agents/new" className="btn btn-primary">+ New Agent</Link>
+            </div>
           </div>
 
           {agents.length === 0 ? (

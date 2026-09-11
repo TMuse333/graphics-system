@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import { useParams, notFound } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getAgent, getListings, getGraphics } from '@/lib/store';
+import { getAgent, getListings, getGraphics, getPackages } from '@/lib/store';
 import { money } from '@/lib/types';
-import type { Agent, Listing, Graphic } from '@/lib/types';
-import { GraphicPreview } from '@/components/GraphicPreview';
+import type { Agent, Listing, Graphic, Package } from '@/lib/types';
+import { PackageCard } from '@/components/PackageCard';
+import { GraphicCarousel } from '@/components/GraphicCarousel';
 
 type ListingWithGraphics = Listing & { graphics: Graphic[] };
 
@@ -16,7 +17,14 @@ export default function AgentDashboard() {
 
   const [agent, setAgent] = useState<Agent | null>(null);
   const [listings, setListings] = useState<ListingWithGraphics[]>([]);
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [allGraphics, setAllGraphics] = useState<Graphic[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Carousel state
+  const [carouselOpen, setCarouselOpen] = useState(false);
+  const [carouselGraphics, setCarouselGraphics] = useState<Graphic[]>([]);
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
   useEffect(() => {
     const foundAgent = getAgent(id);
@@ -32,8 +40,28 @@ export default function AgentDashboard() {
       graphics: getGraphics(listing._id!),
     }));
     setListings(withGraphics);
+
+    // Get all graphics
+    const graphics = withGraphics.flatMap(l => l.graphics);
+    setAllGraphics(graphics);
+
+    // Get all packages
+    const agentPackages = getPackages(id);
+    agentPackages.sort((a, b) => {
+      if (a.status === 'active' && b.status !== 'active') return -1;
+      if (b.status === 'active' && a.status !== 'active') return 1;
+      return new Date(b.purchasedAt).getTime() - new Date(a.purchasedAt).getTime();
+    });
+    setPackages(agentPackages);
+
     setLoading(false);
   }, [id]);
+
+  const handleGraphicClick = (graphic: Graphic, index: number, packageGraphics: Graphic[]) => {
+    setCarouselGraphics(packageGraphics);
+    setCarouselIndex(index);
+    setCarouselOpen(true);
+  };
 
   if (loading) {
     return (
@@ -56,6 +84,17 @@ export default function AgentDashboard() {
   if (!agent) {
     notFound();
   }
+
+  // Group graphics by package
+  const getPackageGraphics = (packageId: string) => {
+    return allGraphics.filter(g => g.packageId === packageId);
+  };
+
+  const getPackageListings = (packageId: string) => {
+    const packageGraphics = getPackageGraphics(packageId);
+    const listingIds = new Set(packageGraphics.map(g => g.listingId));
+    return listings.filter(l => listingIds.has(l._id!));
+  };
 
   return (
     <>
@@ -101,6 +140,30 @@ export default function AgentDashboard() {
             </div>
           </div>
 
+          {/* Packages section */}
+          <div className="flex-between mb-lg">
+            <h2 className="section-title" style={{ marginBottom: 0 }}>Packages</h2>
+          </div>
+
+          {packages.length === 0 ? (
+            <div className="card mb-xl" style={{ textAlign: 'center', padding: '40px' }}>
+              <p className="text-muted">No packages yet</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
+              {packages.map((pkg) => (
+                <PackageCard
+                  key={pkg._id}
+                  pkg={pkg}
+                  graphics={getPackageGraphics(pkg._id)}
+                  listings={getPackageListings(pkg._id)}
+                  agent={agent}
+                  onGraphicClick={handleGraphicClick}
+                />
+              ))}
+            </div>
+          )}
+
           {/* Listings section */}
           <div className="flex-between mb-lg">
             <h2 className="section-title" style={{ marginBottom: 0 }}>Listings</h2>
@@ -117,72 +180,36 @@ export default function AgentDashboard() {
               </Link>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {listings.map((listing) => (
-                <div key={listing._id} className="card">
-                  <div className="flex-between mb-md">
+                <div key={listing._id} className="card" style={{ padding: '16px 20px' }}>
+                  <div className="flex-between">
                     <div>
-                      <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '2px' }}>
                         {listing.address}
                       </h3>
                       <p className="text-muted text-sm">
-                        {listing.city}, {listing.province} · MLS {listing.mls}
-                      </p>
-                      <p className="text-accent" style={{ marginTop: '4px', fontWeight: 600 }}>
-                        {money(listing.price)}
+                        {listing.city}, {listing.province} · {money(listing.price)}
                         {listing.beds && ` · ${listing.beds} bed`}
                         {listing.baths && ` · ${listing.baths} bath`}
                         {listing.acres && ` · ${listing.acres} acres`}
                       </p>
                     </div>
-                    <div className="flex gap-sm">
+                    <div className="flex gap-sm" style={{ alignItems: 'center' }}>
+                      <span className="text-muted text-sm">
+                        {listing.graphics.length} graphics
+                      </span>
                       <Link
                         href={`/agents/${id}/listings/${listing._id}/edit`}
                         className="btn btn-secondary btn-sm"
                       >
                         Edit
                       </Link>
-                    </div>
-                  </div>
-
-                  {/* Graphics for this listing */}
-                  <div>
-                    <p className="text-muted text-sm mb-sm">Graphics</p>
-                    <div className="grid-4">
-                      {listing.graphics.map((graphic) => (
-                        <Link
-                          key={graphic._id}
-                          href={`/graphics/${graphic._id}`}
-                          style={{
-                            display: 'block',
-                            borderRadius: '8px',
-                            overflow: 'hidden',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                            transition: 'transform 0.2s, box-shadow 0.2s',
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'scale(1.02)';
-                            e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'scale(1)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-                          }}
-                        >
-                          <GraphicPreview
-                            graphic={graphic}
-                            listing={listing}
-                            agent={agent}
-                            size={150}
-                          />
-                        </Link>
-                      ))}
                       <Link
                         href={`/graphics/new?listingId=${listing._id}`}
-                        className="graphic-thumb graphic-thumb-add"
+                        className="btn btn-primary btn-sm"
                       >
-                        <span style={{ fontSize: '24px' }}>+</span>
-                        <span>New</span>
+                        + Graphic
                       </Link>
                     </div>
                   </div>
@@ -192,6 +219,17 @@ export default function AgentDashboard() {
           )}
         </div>
       </main>
+
+      {/* Carousel Modal */}
+      {carouselOpen && (
+        <GraphicCarousel
+          graphics={carouselGraphics}
+          listings={listings}
+          currentIndex={carouselIndex}
+          onIndexChange={setCarouselIndex}
+          onClose={() => setCarouselOpen(false)}
+        />
+      )}
     </>
   );
 }
