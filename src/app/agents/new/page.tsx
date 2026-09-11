@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Theme } from '@/lib/types';
 import { gregTheme } from '@/lib/theme';
+import { createAgent } from '@/lib/store';
 
 export default function NewAgentPage() {
   const router = useRouter();
@@ -41,24 +42,15 @@ export default function NewAgentPage() {
     setTheme({ ...theme, [key]: value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
     try {
-      const res = await fetch('/api/agents', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, theme }),
-      });
-
-      if (res.ok) {
-        const agent = await res.json();
-        router.push(`/agents/${agent._id}`);
-      }
+      const agent = createAgent({ ...formData, theme });
+      router.push(`/agents/${agent._id}`);
     } catch (error) {
       console.error('Save error:', error);
-    } finally {
       setSaving(false);
     }
   };

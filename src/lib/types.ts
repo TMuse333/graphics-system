@@ -1,7 +1,5 @@
 // Shared data model. One Agent per client, one Listing per property.
 
-import { ObjectId } from 'mongodb';
-
 export type Theme = {
   primary: string;      // band gradient start  (Greg: #141428)
   primaryAlt: string;   // band gradient end    (Greg: #22224a)
@@ -24,6 +22,27 @@ export type Agent = {
   theme: Theme;
 };
 
+// Package types for billing/tracking
+export type PackageType = 'one-off' | '4-pack' | '8-pack' | '12-pack' | '16-pack';
+
+export const PACKAGE_LIMITS: Record<PackageType, number> = {
+  'one-off': 1,
+  '4-pack': 4,
+  '8-pack': 8,
+  '12-pack': 12,
+  '16-pack': 16,
+};
+
+export type Package = {
+  _id: string;
+  agentId: string;
+  type: PackageType;
+  purchasedAt: string;  // ISO date
+  status: 'active' | 'completed';
+};
+
+export type ListingStatus = 'pending' | 'in-progress' | 'delivered';
+
 /**
  * focal is the crop anchor as CSS background-position percentages.
  * Every crop correction in this project has been a background-position
@@ -39,7 +58,7 @@ export type Photo = {
 };
 
 export type Listing = {
-  _id?: ObjectId;
+  _id?: string;
   agentId: string;
   address: string;      // "278 Basinview Crescent"
   city: string;         // "Darnley"
@@ -52,6 +71,12 @@ export type Listing = {
   baths?: number;
   acres?: number;
   photos: Photo[];
+  // Client portal fields
+  status: ListingStatus;
+  submittedAt?: string;   // ISO date - when client submitted
+  deliveredAt?: string;   // ISO date - when graphics were delivered
+  requestedVariants?: Variant[];  // what variants client requested
+  notes?: string;         // client notes
   createdAt: Date;
   updatedAt: Date;
 };
@@ -84,12 +109,14 @@ export type PhotoAssignments = {
 };
 
 export type Graphic = {
-  _id?: ObjectId;
-  listingId: ObjectId;
+  _id?: string;
+  listingId: string;
   templateId: string;
   variant: Variant;
   overrides: GraphicOverrides;
   photoAssignments: PhotoAssignments;
+  packageId?: string;   // which package/deal this graphic belongs to
+  historyUrl?: string;  // for pre-rendered history graphics (static PNG)
   createdAt: Date;
   updatedAt: Date;
 };

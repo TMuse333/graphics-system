@@ -1,24 +1,46 @@
+'use client';
+
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { getAgent, isDbConnected } from '@/lib/db';
+import { useParams, notFound } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { getAgent } from '@/lib/store';
 import { BrandForm } from '@/components/BrandForm';
-import { mockAgents } from '@/lib/mockData';
+import type { Agent } from '@/lib/types';
 
-export const dynamic = 'force-dynamic';
+export default function BrandPage() {
+  const params = useParams();
+  const id = params.id as string;
 
-type Props = {
-  params: Promise<{ id: string }>;
-};
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export default async function BrandPage({ params }: Props) {
-  const { id } = await params;
-  const connected = await isDbConnected();
+  useEffect(() => {
+    const foundAgent = getAgent(id);
+    setAgent(foundAgent);
+    setLoading(false);
+  }, [id]);
 
-  const agent = connected
-    ? await getAgent(id)
-    : mockAgents.find(a => a._id === id) || null;
+  if (loading) {
+    return (
+      <>
+        <header className="header">
+          <Link href="/" className="header-logo">LISTING GRAPHICS</Link>
+          <nav className="header-nav">
+            <Link href="/gallery">Gallery</Link>
+          </nav>
+        </header>
+        <main className="page">
+          <div className="container">
+            <p className="text-muted">Loading...</p>
+          </div>
+        </main>
+      </>
+    );
+  }
 
-  if (!agent) notFound();
+  if (!agent) {
+    notFound();
+  }
 
   return (
     <>
@@ -28,19 +50,6 @@ export default async function BrandPage({ params }: Props) {
           <Link href="/gallery">Gallery</Link>
         </nav>
       </header>
-
-      {!connected && (
-        <div style={{
-          background: 'var(--accent)',
-          color: '#000',
-          padding: '8px 16px',
-          textAlign: 'center',
-          fontSize: '14px',
-          fontWeight: 500,
-        }}>
-          Demo Mode — Changes won&apos;t be saved
-        </div>
-      )}
 
       <main className="page">
         <div className="container" style={{ maxWidth: '800px' }}>

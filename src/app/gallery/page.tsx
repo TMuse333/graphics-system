@@ -1,80 +1,79 @@
-import Link from 'next/link';
-import { getDb, isDbConnected } from '@/lib/db';
-import { TEMPLATE_REGISTRY, TEMPLATE_CATEGORIES } from '@/lib/templates';
-import { mockAgents, mockListings, mockGraphics } from '@/lib/mockData';
-import type { Graphic, Listing, Agent } from '@/lib/types';
+'use client';
 
-export const dynamic = 'force-dynamic';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { getGraphics, getListing, getAgent } from '@/lib/store';
+import { TEMPLATE_REGISTRY, TEMPLATE_CATEGORIES } from '@/lib/templates';
+import { GraphicPreview } from '@/components/GraphicPreview';
+import type { Graphic, Listing, Agent } from '@/lib/types';
 
 type GraphicWithContext = Graphic & {
   listing: Listing;
   agent: Agent;
 };
 
-export default async function GalleryPage() {
-  const connected = await isDbConnected();
+type Category = {
+  category: string;
+  label: string;
+  items: GraphicWithContext[];
+  variants: string[];
+};
 
-  let validGraphics: GraphicWithContext[] = [];
+export default function GalleryPage() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (connected) {
-    const db = await getDb();
+  useEffect(() => {
+    const graphics = getGraphics();
 
-    // Get all graphics with their listings and agents
-    const graphics = await db.collection<Graphic>('graphics')
-      .find()
-      .sort({ createdAt: -1 })
-      .toArray();
+    const validGraphics: GraphicWithContext[] = graphics
+      .map((graphic) => {
+        const listing = getListing(graphic.listingId);
+        const agent = listing ? getAgent(listing.agentId) : null;
+        if (!listing || !agent) return null;
+        return { ...graphic, listing, agent };
+      })
+      .filter((g): g is GraphicWithContext => g !== null);
 
-    // Fetch listings and agents for each graphic
-    const graphicsWithContext: GraphicWithContext[] = await Promise.all(
-      graphics.map(async (graphic) => {
-        const listing = await db.collection<Listing>('listings')
-          .findOne({ _id: graphic.listingId });
-        // Agent uses string _id, not ObjectId
-        const agent = listing
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ? await db.collection('agents').findOne({ _id: listing.agentId } as any) as Agent | null
-          : null;
+    // Group by template category
+    const grouped = Object.entries(TEMPLATE_CATEGORIES)
+      .sort(([, a], [, b]) => a.order - b.order)
+      .map(([category, meta]) => {
+        const templates = Object.values(TEMPLATE_REGISTRY).filter(t => t.category === category);
+        const templateIds = templates.map(t => t.type);
+        const items = validGraphics.filter(g => templateIds.includes(g.templateId));
 
         return {
-          ...graphic,
-          listing: listing!,
-          agent: agent!,
+          category,
+          label: meta.label,
+          items,
+          variants: [...new Set(items.map(g => g.variant))],
         };
       })
+      .filter(c => c.items.length > 0);
+
+    setCategories(grouped);
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return (
+      <>
+        <header className="header">
+          <Link href="/" className="header-logo">LISTING GRAPHICS</Link>
+          <nav className="header-nav">
+            <Link href="/">Clients</Link>
+            <Link href="/gallery" style={{ color: 'var(--text)' }}>Gallery</Link>
+          </nav>
+        </header>
+        <main className="page">
+          <div className="container">
+            <p className="text-muted">Loading...</p>
+          </div>
+        </main>
+      </>
     );
-
-    // Filter out any with missing data
-    validGraphics = graphicsWithContext.filter(g => g.listing && g.agent);
-  } else {
-    // Use mock data
-    validGraphics = mockGraphics.map((graphic) => {
-      const listing = mockListings.find(l => l._id!.toString() === graphic.listingId.toString());
-      const agent = listing ? mockAgents.find(a => a._id === listing.agentId) : null;
-      return {
-        ...graphic,
-        listing: listing!,
-        agent: agent!,
-      };
-    }).filter(g => g.listing && g.agent);
   }
-
-  // Group by template category
-  const categories = Object.entries(TEMPLATE_CATEGORIES)
-    .sort(([, a], [, b]) => a.order - b.order)
-    .map(([category, meta]) => {
-      const templates = Object.values(TEMPLATE_REGISTRY).filter(t => t.category === category);
-      const templateIds = templates.map(t => t.type);
-      const items = validGraphics.filter(g => templateIds.includes(g.templateId));
-
-      return {
-        category,
-        label: meta.label,
-        items,
-        variants: [...new Set(items.map(g => g.variant))],
-      };
-    })
-    .filter(c => c.items.length > 0);
 
   return (
     <>
@@ -85,19 +84,6 @@ export default async function GalleryPage() {
           <Link href="/gallery" style={{ color: 'var(--text)' }}>Gallery</Link>
         </nav>
       </header>
-
-      {!connected && (
-        <div style={{
-          background: 'var(--accent)',
-          color: '#000',
-          padding: '8px 16px',
-          textAlign: 'center',
-          fontSize: '14px',
-          fontWeight: 500,
-        }}>
-          Demo Mode — MongoDB not connected
-        </div>
-      )}
 
       <main className="page">
         <div className="container">
@@ -127,33 +113,33 @@ export default async function GalleryPage() {
                   ))}
                 </div>
 
-                <div className="grid-4">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
                   {items.map((graphic) => (
                     <Link
-                      key={graphic._id!.toString()}
+                      key={graphic._id}
                       href={`/graphics/${graphic._id}`}
-                      className="graphic-thumb"
+                      style={{
+                        display: 'block',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                        transition: 'transform 0.2s, box-shadow 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.02)';
+                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                      }}
                     >
-                      <div style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: '12px',
-                        background: graphic.agent.theme.primary,
-                      }}>
-                        <span style={{ color: graphic.agent.theme.accent, fontWeight: 600, fontSize: '12px' }}>
-                          {graphic.variant.replace('-', ' ').toUpperCase()}
-                        </span>
-                        <span style={{ color: '#fff', fontSize: '11px', marginTop: '4px', textAlign: 'center' }}>
-                          {graphic.listing.address}
-                        </span>
-                        <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '10px', marginTop: '4px' }}>
-                          {graphic.agent.name}
-                        </span>
-                      </div>
+                      <GraphicPreview
+                        graphic={graphic}
+                        listing={graphic.listing}
+                        agent={graphic.agent}
+                        size={200}
+                      />
                     </Link>
                   ))}
                 </div>

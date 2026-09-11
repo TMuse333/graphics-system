@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import { TEMPLATE_REGISTRY, TEMPLATE_CATEGORIES } from '@/lib/templates';
+import { getListing, createGraphic } from '@/lib/store';
 import type { Listing, Variant } from '@/lib/types';
 
 function NewGraphicContent() {
@@ -18,35 +19,26 @@ function NewGraphicContent() {
 
   useEffect(() => {
     if (listingId) {
-      fetch(`/api/listings/${listingId}`)
-        .then((res) => res.json())
-        .then(setListing)
-        .catch(console.error);
+      const found = getListing(listingId);
+      setListing(found);
     }
   }, [listingId]);
 
-  const handleCreate = async () => {
+  const handleCreate = () => {
     if (!selectedTemplate || !selectedVariant || !listingId) return;
 
     setCreating(true);
     try {
-      const res = await fetch('/api/graphics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          listingId,
-          templateId: selectedTemplate,
-          variant: selectedVariant,
-          overrides: {},
-          photoAssignments: {},
-        }),
+      const graphic = createGraphic({
+        listingId,
+        templateId: selectedTemplate,
+        variant: selectedVariant,
+        overrides: {},
+        photoAssignments: {},
       });
-
-      const graphic = await res.json();
       router.push(`/graphics/${graphic._id}`);
     } catch (error) {
       console.error('Create error:', error);
-    } finally {
       setCreating(false);
     }
   };

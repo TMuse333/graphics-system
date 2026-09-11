@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Graphic, Listing, Agent, Variant, Photo, TemplateProps, GraphicOverrides, PhotoAssignments } from '@/lib/types';
 import { getFieldsForVariant, FIELD_METADATA, type TemplateRegistryEntry } from '@/lib/templates';
+import { updateGraphic } from '@/lib/store';
+import { downloadPng } from '@/lib/downloadPng';
 
 type Props = {
   graphic: Graphic;
@@ -15,6 +17,8 @@ type Props = {
 export function GraphicEditor({ graphic, listing, agent, template }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   const [variant, setVariant] = useState<Variant>(graphic.variant);
   const [overrides, setOverrides] = useState<GraphicOverrides>(graphic.overrides);
@@ -59,19 +63,26 @@ export function GraphicEditor({ graphic, listing, agent, template }: Props) {
     setPhotoAssignments((prev) => ({ ...prev, [slot]: value }));
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     setSaving(true);
     try {
-      await fetch(`/api/graphics/${graphic._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ variant, overrides, photoAssignments }),
-      });
+      updateGraphic(graphic._id!, { variant, overrides, photoAssignments });
       router.refresh();
     } catch (error) {
       console.error('Save error:', error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!previewRef.current || downloading) return;
+    setDownloading(true);
+    try {
+      const filename = `${listing.address.replace(/\s+/g, '-')}-${variant}.png`;
+      await downloadPng(previewRef.current, filename);
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -204,20 +215,33 @@ export function GraphicEditor({ graphic, listing, agent, template }: Props) {
           </>
         )}
 
-        <button
-          onClick={handleSave}
-          className="btn btn-primary"
-          style={{ width: '100%', marginTop: '20px' }}
-          disabled={saving}
-        >
-          {saving ? 'Saving...' : 'Save Changes'}
-        </button>
+        <div className="flex gap-sm" style={{ marginTop: '20px' }}>
+          <button
+            onClick={handleSave}
+            className="btn btn-primary"
+            style={{ flex: 1 }}
+            disabled={saving}
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+          <button
+            onClick={handleDownload}
+            className="btn btn-secondary"
+            disabled={downloading}
+            title="Download PNG"
+          >
+            {downloading ? '...' : '↓ PNG'}
+          </button>
+        </div>
       </div>
 
       {/* Preview */}
       <div className="editor-preview">
         <div
+          ref={previewRef}
           style={{
+            width,
+            height,
             transform: `scale(${scale})`,
             transformOrigin: 'center center',
           }}

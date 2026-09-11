@@ -1,24 +1,43 @@
+'use client';
+
 import Link from 'next/link';
-import { getAgents, getAgentStats, isDbConnected } from '@/lib/db';
-import { SeedButton } from '@/components/SeedButton';
-import { mockAgents, mockAgentStats } from '@/lib/mockData';
+import { useEffect, useState } from 'react';
+import { getAgents, getAgentStats } from '@/lib/store';
+import type { Agent } from '@/lib/types';
 
-export const dynamic = 'force-dynamic';
+type AgentWithStats = Agent & { listings: number; graphics: number };
 
-export default async function HomePage() {
-  const connected = await isDbConnected();
+export default function HomePage() {
+  const [agents, setAgents] = useState<AgentWithStats[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Use mock data if not connected
-  const agents = connected ? await getAgents() : mockAgents;
+  useEffect(() => {
+    const allAgents = getAgents();
+    const withStats = allAgents.map(agent => ({
+      ...agent,
+      ...getAgentStats(agent._id),
+    }));
+    setAgents(withStats);
+    setLoading(false);
+  }, []);
 
-  const agentsWithStats = await Promise.all(
-    agents.map(async (agent) => {
-      const stats = connected
-        ? await getAgentStats(agent._id)
-        : mockAgentStats[agent._id] || { listings: 0, graphics: 0 };
-      return { ...agent, ...stats };
-    })
-  );
+  if (loading) {
+    return (
+      <>
+        <header className="header">
+          <Link href="/" className="header-logo">LISTING GRAPHICS</Link>
+          <nav className="header-nav">
+            <Link href="/gallery">Gallery</Link>
+          </nav>
+        </header>
+        <main className="page">
+          <div className="container">
+            <p className="text-muted">Loading...</p>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
@@ -28,19 +47,6 @@ export default async function HomePage() {
           <Link href="/gallery">Gallery</Link>
         </nav>
       </header>
-
-      {!connected && (
-        <div style={{
-          background: 'var(--accent)',
-          color: '#000',
-          padding: '8px 16px',
-          textAlign: 'center',
-          fontSize: '14px',
-          fontWeight: 500,
-        }}>
-          Demo Mode — MongoDB not connected. Add MONGODB_URI to .env.local
-        </div>
-      )}
 
       <main className="page">
         <div className="container">
@@ -56,13 +62,10 @@ export default async function HomePage() {
             <div className="card" style={{ textAlign: 'center', padding: '60px' }}>
               <p className="text-muted mb-md">No agents yet</p>
               <Link href="/agents/new" className="btn btn-primary">Add Your First Client</Link>
-              <div style={{ marginTop: '16px' }}>
-                <SeedButton />
-              </div>
             </div>
           ) : (
             <div className="grid-2">
-              {agentsWithStats.map((agent) => (
+              {agents.map((agent) => (
                 <Link key={agent._id} href={`/agents/${agent._id}`} className="card">
                   <div className="card-row">
                     <div className="avatar">

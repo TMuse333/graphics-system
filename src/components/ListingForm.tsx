@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FocalPicker } from './FocalPicker';
 import type { Listing, Photo } from '@/lib/types';
-import { v4 as uuid } from 'uuid';
+import { createListing, updateListing } from '@/lib/store';
 
 type Props = {
   agentId: string;
@@ -41,23 +41,22 @@ export function ListingForm({ agentId, listing }: Props) {
     setUploading(true);
 
     for (const file of Array.from(files)) {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('listingId', listing?._id?.toString() || 'new');
-
       try {
-        const res = await fetch('/api/upload', { method: 'POST', body: formData });
-        const data = await res.json();
+        // Convert to base64 data URL for localStorage
+        const reader = new FileReader();
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
 
-        if (data.success) {
-          const newPhoto: Photo = {
-            id: data.id,
-            url: data.url,
-            focal: { x: 50, y: 50 },
-            sort: photos.length,
-          };
-          setPhotos((prev) => [...prev, newPhoto]);
-        }
+        const newPhoto: Photo = {
+          id: `photo-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+          url: dataUrl,
+          focal: { x: 50, y: 50 },
+          sort: photos.length,
+        };
+        setPhotos((prev) => [...prev, newPhoto]);
       } catch (error) {
         console.error('Upload error:', error);
       }
@@ -100,7 +99,7 @@ export function ListingForm({ agentId, listing }: Props) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
@@ -120,21 +119,12 @@ export function ListingForm({ agentId, listing }: Props) {
     };
 
     try {
-      const url = listing?._id
-        ? `/api/listings/${listing._id}`
-        : '/api/listings';
-      const method = listing?._id ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        router.push(`/agents/${agentId}`);
-        router.refresh();
+      if (listing?._id) {
+        updateListing(listing._id, payload);
+      } else {
+        createListing(payload);
       }
+      router.push(`/agents/${agentId}`);
     } catch (error) {
       console.error('Save error:', error);
     } finally {

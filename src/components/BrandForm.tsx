@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Agent, Theme } from '@/lib/types';
+import { updateAgent } from '@/lib/store';
 
 type Props = {
   agent: Agent;
@@ -32,18 +33,13 @@ export function BrandForm({ agent }: Props) {
     setTheme({ ...theme, [key]: value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
     try {
-      await fetch(`/api/agents/${agent._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, theme }),
-      });
+      updateAgent(agent._id, { ...formData, theme });
       router.push(`/agents/${agent._id}`);
-      router.refresh();
     } catch (error) {
       console.error('Save error:', error);
     } finally {

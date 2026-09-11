@@ -1,5 +1,7 @@
 import type { Agent, Theme } from './types';
 
+// ============ GREG CASELEY — navy + gold ============
+
 export const gregTheme: Theme = {
   primary: '#141428',
   primaryAlt: '#22224a',
@@ -13,7 +15,7 @@ export const gregTheme: Theme = {
 export const greg: Agent = {
   _id: 'greg-caseley',
   name: 'Greg Caseley',
-  title: 'Realtor · PEI',
+  title: 'Realtor · Prince Edward Island',
   phone: '902-888-9232',
   email: 'gcaseleyrealty@gmail.com',
   website: 'peislandrealty.ca',
@@ -21,6 +23,49 @@ export const greg: Agent = {
   logoUrl: '/agents/greg/logo.png',
   theme: gregTheme,
 };
+
+// ============ TEST BRAND — clay + amber ============
+
+export const clayTheme: Theme = {
+  primary: '#5a2a20',
+  primaryAlt: '#8f4331',
+  accent: '#e8a33d',
+  accentLight: '#fbe3b4',
+  fontDisplay: '"Playfair Display", serif',
+  fontNarrow: 'Oswald, sans-serif',
+  fontScript: 'Parisienne, cursive',
+};
+
+export const testAgent: Agent = {
+  _id: 'dana-whitfield',
+  name: 'Dana Whitfield',
+  title: 'Broker · Annapolis Valley',
+  phone: '902-555-0148',
+  email: 'dana@valleyhomes.ca',
+  website: 'valleyhomes.ca',
+  headshotUrl: '/agents/dana/headshot.png',
+  logoUrl: '/agents/dana/logo.png',
+  theme: clayTheme,
+};
+
+/**
+ * Fonts a theme can reference. The render page must load the fonts for the
+ * agent being rendered.
+ */
+export const THEME_FONTS: Record<string, string> = {
+  Archivo: '/fonts/Archivo-Variable.woff2',
+  'Archivo Narrow': '/fonts/ArchivoNarrow-Variable.woff2',
+  Yellowtail: '/fonts/Yellowtail-Regular.woff2',
+  'Playfair Display': '/fonts/PlayfairDisplay-Variable.woff2',
+  Oswald: '/fonts/Oswald-Variable.woff2',
+  Parisienne: '/fonts/Parisienne-Regular.woff2',
+};
+
+/** Font families a theme needs, for building @font-face rules per render. */
+export const fontsForTheme = (theme: Theme): string[] =>
+  [theme.fontDisplay, theme.fontNarrow, theme.fontScript]
+    .map(stack => stack.split(',')[0].trim().replace(/^["']|["']$/g, ''))
+    .filter(name => name in THEME_FONTS);
 
 /** Bevelled display type — the layered shadow stack used on headlines. */
 export const bevel = (a: string, b: string, c: string, glow = 'rgba(4,6,18,.7)') =>

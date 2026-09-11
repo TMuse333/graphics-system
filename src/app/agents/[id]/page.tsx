@@ -1,39 +1,61 @@
+'use client';
+
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { getAgent, getListings, getGraphics, isDbConnected } from '@/lib/db';
+import { useParams, notFound } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { getAgent, getListings, getGraphics } from '@/lib/store';
 import { money } from '@/lib/types';
-import { mockAgents, mockListings, mockGraphics } from '@/lib/mockData';
+import type { Agent, Listing, Graphic } from '@/lib/types';
+import { GraphicPreview } from '@/components/GraphicPreview';
 
-export const dynamic = 'force-dynamic';
+type ListingWithGraphics = Listing & { graphics: Graphic[] };
 
-type Props = {
-  params: Promise<{ id: string }>;
-};
+export default function AgentDashboard() {
+  const params = useParams();
+  const id = params.id as string;
 
-export default async function AgentDashboard({ params }: Props) {
-  const { id } = await params;
-  const connected = await isDbConnected();
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [listings, setListings] = useState<ListingWithGraphics[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Use mock data if not connected
-  const agent = connected
-    ? await getAgent(id)
-    : mockAgents.find(a => a._id === id) || null;
+  useEffect(() => {
+    const foundAgent = getAgent(id);
+    if (!foundAgent) {
+      setLoading(false);
+      return;
+    }
+    setAgent(foundAgent);
 
-  if (!agent) notFound();
+    const agentListings = getListings(id);
+    const withGraphics = agentListings.map(listing => ({
+      ...listing,
+      graphics: getGraphics(listing._id!),
+    }));
+    setListings(withGraphics);
+    setLoading(false);
+  }, [id]);
 
-  const listings = connected
-    ? await getListings(id)
-    : mockListings.filter(l => l.agentId === id);
+  if (loading) {
+    return (
+      <>
+        <header className="header">
+          <Link href="/" className="header-logo">LISTING GRAPHICS</Link>
+          <nav className="header-nav">
+            <Link href="/gallery">Gallery</Link>
+          </nav>
+        </header>
+        <main className="page">
+          <div className="container">
+            <p className="text-muted">Loading...</p>
+          </div>
+        </main>
+      </>
+    );
+  }
 
-  // Get graphics for each listing
-  const listingsWithGraphics = await Promise.all(
-    listings.map(async (listing) => {
-      const graphics = connected
-        ? await getGraphics(listing._id!.toString())
-        : mockGraphics.filter(g => g.listingId.toString() === listing._id!.toString());
-      return { ...listing, graphics };
-    })
-  );
+  if (!agent) {
+    notFound();
+  }
 
   return (
     <>
@@ -43,19 +65,6 @@ export default async function AgentDashboard({ params }: Props) {
           <Link href="/gallery">Gallery</Link>
         </nav>
       </header>
-
-      {!connected && (
-        <div style={{
-          background: 'var(--accent)',
-          color: '#000',
-          padding: '8px 16px',
-          textAlign: 'center',
-          fontSize: '14px',
-          fontWeight: 500,
-        }}>
-          Demo Mode — MongoDB not connected
-        </div>
-      )}
 
       <main className="page">
         <div className="container">
@@ -109,8 +118,8 @@ export default async function AgentDashboard({ params }: Props) {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {listingsWithGraphics.map((listing) => (
-                <div key={listing._id!.toString()} className="card">
+              {listings.map((listing) => (
+                <div key={listing._id} className="card">
                   <div className="flex-between mb-md">
                     <div>
                       <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>
@@ -142,26 +151,30 @@ export default async function AgentDashboard({ params }: Props) {
                     <div className="grid-4">
                       {listing.graphics.map((graphic) => (
                         <Link
-                          key={graphic._id!.toString()}
+                          key={graphic._id}
                           href={`/graphics/${graphic._id}`}
-                          className="graphic-thumb"
+                          style={{
+                            display: 'block',
+                            borderRadius: '8px',
+                            overflow: 'hidden',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.02)';
+                            e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                          }}
                         >
-                          <div style={{
-                            width: '100%',
-                            height: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexDirection: 'column',
-                            padding: '12px',
-                          }}>
-                            <span className="text-accent text-sm" style={{ fontWeight: 600 }}>
-                              {graphic.variant.replace('-', ' ').toUpperCase()}
-                            </span>
-                            <span className="text-muted text-sm">
-                              {graphic.templateId}
-                            </span>
-                          </div>
+                          <GraphicPreview
+                            graphic={graphic}
+                            listing={listing}
+                            agent={agent}
+                            size={150}
+                          />
                         </Link>
                       ))}
                       <Link

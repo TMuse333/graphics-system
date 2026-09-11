@@ -1,17 +1,46 @@
+'use client';
+
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { getAgent } from '@/lib/db';
+import { useParams, notFound } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { getAgent } from '@/lib/store';
 import { ListingForm } from '@/components/ListingForm';
+import type { Agent } from '@/lib/types';
 
-type Props = {
-  params: Promise<{ id: string }>;
-};
+export default function NewListingPage() {
+  const params = useParams();
+  const id = params.id as string;
 
-export default async function NewListingPage({ params }: Props) {
-  const { id } = await params;
-  const agent = await getAgent(id);
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!agent) notFound();
+  useEffect(() => {
+    const foundAgent = getAgent(id);
+    setAgent(foundAgent);
+    setLoading(false);
+  }, [id]);
+
+  if (loading) {
+    return (
+      <>
+        <header className="header">
+          <Link href="/" className="header-logo">LISTING GRAPHICS</Link>
+          <nav className="header-nav">
+            <Link href="/gallery">Gallery</Link>
+          </nav>
+        </header>
+        <main className="page">
+          <div className="container">
+            <p className="text-muted">Loading...</p>
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  if (!agent) {
+    notFound();
+  }
 
   return (
     <>
