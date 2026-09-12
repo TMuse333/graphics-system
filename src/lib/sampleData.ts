@@ -1,43 +1,53 @@
 import type { Agent, Listing, Photo, Theme } from './types';
+import { greg, gregTheme, remaxTheme, clayTheme } from './theme';
 
 /**
- * Sample data for template previews.
- * Uses neutral branding so templates aren't tied to any specific agent.
+ * Sample data for showcase - uses real Nova Scotia addresses
+ * and realistic MLS numbers for professional appearance.
  */
 
-// RE/MAX Nova preview theme - blue, red, white
-export const PREVIEW_THEME: Theme = {
-  primary: '#003da5',
-  primaryAlt: '#002868',
-  accent: '#dc1c2e',
-  accentLight: '#f5a5ad',
-  fontDisplay: 'Archivo, sans-serif',
-  fontNarrow: '"Archivo Narrow", sans-serif',
-  fontScript: 'Yellowtail, cursive',
-};
+// ============ SAMPLE AGENTS (for brand comparison demo) ============
 
-// Generic agent for previews - RE/MAX Nova branding
-export const SAMPLE_AGENT: Agent = {
-  _id: 'sample-agent',
-  name: 'Your Name',
+// Use Greg's real data as the primary showcase agent
+export const SHOWCASE_AGENT_1 = greg;
+
+// RE/MAX branded agent
+export const SHOWCASE_AGENT_2: Agent = {
+  _id: 'showcase-remax',
+  name: 'Sarah Mitchell',
   title: 'Realtor · RE/MAX Nova',
-  phone: '902-555-0100',
-  email: 'agent@remaxnova.ca',
+  phone: '902-434-5678',
+  email: 'sarah@remaxnova.ca',
   website: 'remaxnova.ca',
-  headshotUrl: '',
+  headshotUrl: '/agents/greg/headshot.png', // Reuse for demo
   logoUrl: '',
-  theme: PREVIEW_THEME,
+  theme: remaxTheme,
 };
 
-// Generic residential listing
-export const SAMPLE_LISTING_RESIDENTIAL: Listing = {
-  _id: 'sample-residential',
-  agentId: 'sample-agent',
-  address: '123 Oceanview Drive',
+// Boutique branded agent
+export const SHOWCASE_AGENT_3: Agent = {
+  _id: 'showcase-boutique',
+  name: 'James Thornton',
+  title: 'Broker · Valley Homes',
+  phone: '902-678-9012',
+  email: 'james@valleyhomes.ca',
+  website: 'valleyhomes.ca',
+  headshotUrl: '/agents/greg/headshot.png', // Reuse for demo
+  logoUrl: '',
+  theme: clayTheme,
+};
+
+// ============ SAMPLE LISTINGS (real NS addresses, varied price tiers) ============
+
+// Waterfront property - high end
+export const LISTING_WATERFRONT: Listing = {
+  _id: 'showcase-waterfront',
+  agentId: 'greg-caseley',
+  address: '42 Purcells Cove Road',
   city: 'Halifax',
   province: 'NS',
-  mls: '000000',
-  price: 549000,
+  mls: '202609847',
+  price: 1250000,
   propertyType: 'residential',
   beds: 4,
   baths: 3,
@@ -47,36 +57,80 @@ export const SAMPLE_LISTING_RESIDENTIAL: Listing = {
   updatedAt: new Date(),
 };
 
-// Generic land listing
-export const SAMPLE_LISTING_LAND: Listing = {
-  _id: 'sample-land',
-  agentId: 'sample-agent',
-  address: 'Lot 1 Maple Ridge',
+// Suburban family home - mid range
+export const LISTING_SUBURBAN: Listing = {
+  _id: 'showcase-suburban',
+  agentId: 'greg-caseley',
+  address: '18 Melody Drive',
   city: 'Bedford',
   province: 'NS',
-  mls: '000001',
-  price: 125000,
-  propertyType: 'land',
-  acres: 2.5,
+  mls: '202609523',
+  price: 549000,
+  propertyType: 'residential',
+  beds: 4,
+  baths: 2,
   photos: [],
   status: 'pending',
   createdAt: new Date(),
   updatedAt: new Date(),
 };
 
-// Use an actual listing photo for realistic previews
-export const SAMPLE_PHOTO: Photo = {
-  id: 'sample-photo',
+// Entry condo - starter
+export const LISTING_CONDO: Listing = {
+  _id: 'showcase-condo',
+  agentId: 'greg-caseley',
+  address: '305-1650 Granville Street',
+  city: 'Halifax',
+  province: 'NS',
+  mls: '202609301',
+  price: 389000,
+  propertyType: 'residential',
+  beds: 2,
+  baths: 1,
+  photos: [],
+  status: 'pending',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+// Land/lot
+export const LISTING_LAND: Listing = {
+  _id: 'showcase-land',
+  agentId: 'greg-caseley',
+  address: 'Lot 7 Oceanview Lane',
+  city: 'Chester',
+  province: 'NS',
+  mls: '202609156',
+  price: 175000,
+  propertyType: 'land',
+  acres: 2.8,
+  photos: [],
+  status: 'pending',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+// ============ SAMPLE PHOTOS ============
+
+// Primary hero photo (uses Greg's existing image)
+export const PHOTO_HERO: Photo = {
+  id: 'showcase-hero',
   url: '/agents/greg/hero.png',
   focal: { x: 50, y: 50 },
   sort: 0,
 };
 
-// Helper to get appropriate sample listing for a template
+// ============ BACKWARD COMPAT (old exports) ============
+
+export const PREVIEW_THEME = remaxTheme;
+export const SAMPLE_AGENT = SHOWCASE_AGENT_1;
+export const SAMPLE_LISTING_RESIDENTIAL = LISTING_SUBURBAN;
+export const SAMPLE_LISTING_LAND = LISTING_LAND;
+export const SAMPLE_PHOTO = PHOTO_HERO;
+
 export function getSampleListingForTemplate(templateId: string): Listing {
-  // Land templates need acres
   if (templateId.includes('land') || templateId.includes('gen1-square')) {
-    return SAMPLE_LISTING_LAND;
+    return LISTING_LAND;
   }
-  return SAMPLE_LISTING_RESIDENTIAL;
+  return LISTING_SUBURBAN;
 }

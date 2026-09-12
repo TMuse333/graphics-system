@@ -2,34 +2,26 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { getAllTemplates, TEMPLATE_CATEGORIES, type TemplateRegistryEntry, type TemplateCategory } from '@/lib/templates';
-import { SAMPLE_AGENT, getSampleListingForTemplate, SAMPLE_PHOTO } from '@/lib/sampleData';
+import { StyleBSquare } from '@/lib/templates/StyleBSquare';
+import {
+  SHOWCASE_AGENT_1,
+  SHOWCASE_AGENT_2,
+  SHOWCASE_AGENT_3,
+  LISTING_WATERFRONT,
+  PHOTO_HERO,
+} from '@/lib/sampleData';
 import type { Variant, TemplateProps } from '@/lib/types';
 
 export default function ShowcasePage() {
   const [fontsReady, setFontsReady] = useState(false);
   const [selectedPreview, setSelectedPreview] = useState<{
-    template: TemplateRegistryEntry;
+    agent: typeof SHOWCASE_AGENT_1;
     variant: Variant;
   } | null>(null);
 
   useEffect(() => {
     document.fonts.ready.then(() => setFontsReady(true));
   }, []);
-
-  const templates = getAllTemplates();
-
-  // Group templates by category
-  const byCategory = templates.reduce((acc, t) => {
-    if (!acc[t.category]) acc[t.category] = [];
-    acc[t.category].push(t);
-    return acc;
-  }, {} as Record<TemplateCategory, TemplateRegistryEntry[]>);
-
-  // Sort categories by order
-  const sortedCategories = Object.entries(byCategory).sort(
-    ([a], [b]) => TEMPLATE_CATEGORIES[a as TemplateCategory].order - TEMPLATE_CATEGORIES[b as TemplateCategory].order
-  );
 
   return (
     <>
@@ -64,74 +56,173 @@ export default function ShowcasePage() {
 
       <main className="page">
         <div className="container">
-          <div className="mb-xl">
-            <h1 className="title">Template Showcase</h1>
-            <p className="subtitle">
-              All available graphic styles rendered with RE/MAX Nova branding
-            </p>
-          </div>
 
-          {sortedCategories.map(([category, categoryTemplates]) => (
-            <div key={category} style={{ marginBottom: '48px' }}>
-              <h2 style={{
-                fontSize: '14px',
-                fontWeight: 600,
-                color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '2px',
-                marginBottom: '20px',
-                paddingBottom: '12px',
-                borderBottom: '1px solid var(--border)',
-              }}>
-                {TEMPLATE_CATEGORIES[category as TemplateCategory].label}
-              </h2>
+          {/* ============ HERO: ONE LISTING, COMPLETE CAMPAIGN ============ */}
+          <section style={{ marginBottom: '80px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+              <h1 style={{ fontSize: '42px', fontWeight: 700, marginBottom: '12px' }}>
+                One listing. Complete campaign.
+              </h1>
+              <p className="text-muted" style={{ fontSize: '18px', maxWidth: '600px', margin: '0 auto' }}>
+                Enter your listing once. Get every graphic you need — new listing, open house,
+                price change, sold — all on-brand, ready to post.
+              </p>
+            </div>
 
-              {categoryTemplates.map(template => (
-                <TemplateRow
-                  key={template.type}
-                  template={template}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '20px',
+            }}>
+              {(['new-listing', 'open-house', 'price-drop', 'just-sold'] as Variant[]).map(variant => (
+                <TemplatePreview
+                  key={variant}
+                  agent={SHOWCASE_AGENT_1}
+                  listing={LISTING_WATERFRONT}
+                  variant={variant}
+                  scale={0.22}
                   fontsReady={fontsReady}
-                  onPreview={(variant) => setSelectedPreview({ template, variant })}
+                  onClick={() => setSelectedPreview({ agent: SHOWCASE_AGENT_1, variant })}
+                  overrides={variant === 'open-house' ? { date: 'Sunday, Oct 15', time: '2-4 PM' } : {}}
                 />
               ))}
             </div>
-          ))}
 
-          {/* Stats */}
-          <div className="card" style={{
-            padding: '24px',
-            textAlign: 'center',
-            marginTop: '48px',
-            background: 'var(--surface)',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '48px' }}>
-              <div>
-                <p style={{ fontSize: '36px', fontWeight: 700, color: 'var(--accent)' }}>
-                  {templates.length}
-                </p>
-                <p className="text-muted">Templates</p>
-              </div>
-              <div>
-                <p style={{ fontSize: '36px', fontWeight: 700, color: 'var(--accent)' }}>
-                  {templates.reduce((sum, t) => sum + t.variants.length, 0)}
-                </p>
-                <p className="text-muted">Total Variants</p>
-              </div>
-              <div>
-                <p style={{ fontSize: '36px', fontWeight: 700, color: 'var(--accent)' }}>
-                  {sortedCategories.length}
-                </p>
-                <p className="text-muted">Categories</p>
-              </div>
+            <p className="text-muted text-sm" style={{ textAlign: 'center', marginTop: '16px' }}>
+              42 Purcells Cove Road, Halifax · MLS® 202609847 · $1,250,000
+            </p>
+          </section>
+
+          {/* ============ BRAND CONSISTENCY: SAME LISTING, THREE BRANDS ============ */}
+          <section style={{ marginBottom: '80px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+              <h2 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '12px' }}>
+                Your brand. Every time.
+              </h2>
+              <p className="text-muted" style={{ fontSize: '18px', maxWidth: '600px', margin: '0 auto' }}>
+                Each agent gets graphics in their own colors — locked to your standards
+                so they can't go off-brand.
+              </p>
             </div>
-          </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '32px',
+            }}>
+              {[SHOWCASE_AGENT_1, SHOWCASE_AGENT_2, SHOWCASE_AGENT_3].map(agent => (
+                <div key={agent._id} style={{ textAlign: 'center' }}>
+                  <TemplatePreview
+                    agent={agent}
+                    listing={LISTING_WATERFRONT}
+                    variant="new-listing"
+                    scale={0.28}
+                    fontsReady={fontsReady}
+                    onClick={() => setSelectedPreview({ agent, variant: 'new-listing' })}
+                  />
+                  <div style={{ marginTop: '16px' }}>
+                    <p style={{ fontWeight: 600, marginBottom: '4px' }}>{agent.name}</p>
+                    <p className="text-muted text-sm">{agent.title}</p>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      marginTop: '8px',
+                    }}>
+                      <div style={{
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        background: agent.theme.primary,
+                        border: '2px solid var(--border)',
+                      }} />
+                      <div style={{
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        background: agent.theme.accent,
+                        border: '2px solid var(--border)',
+                      }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ============ HOW IT WORKS: 3 STEPS ============ */}
+          <section style={{ marginBottom: '80px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+              <h2 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '12px' }}>
+                What your agents do
+              </h2>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '32px',
+            }}>
+              {[
+                { step: '1', title: 'Upload photos', desc: 'Drag in listing photos — we handle the cropping' },
+                { step: '2', title: 'Enter details', desc: 'Address, price, beds/baths — takes 30 seconds' },
+                { step: '3', title: 'Download', desc: 'Get every variant instantly, sized for every platform' },
+              ].map(({ step, title, desc }) => (
+                <div
+                  key={step}
+                  className="card"
+                  style={{ padding: '32px', textAlign: 'center' }}
+                >
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    background: 'var(--accent)',
+                    color: 'var(--bg)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '20px',
+                    fontWeight: 700,
+                    margin: '0 auto 16px',
+                  }}>
+                    {step}
+                  </div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>
+                    {title}
+                  </h3>
+                  <p className="text-muted">{desc}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ============ CTA ============ */}
+          <section style={{ textAlign: 'center', paddingBottom: '40px' }}>
+            <div className="card" style={{
+              padding: '48px',
+              background: 'linear-gradient(135deg, var(--surface) 0%, var(--card) 100%)',
+              border: '1px solid var(--accent)',
+            }}>
+              <h2 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '12px' }}>
+                Ready to see it with your brand?
+              </h2>
+              <p className="text-muted" style={{ marginBottom: '24px' }}>
+                We'll set up your colors, logo, and agent profiles — then generate a sample pack.
+              </p>
+              <Link href="/generate" className="btn btn-primary" style={{ padding: '12px 32px', fontSize: '16px' }}>
+                Try the Generator
+              </Link>
+            </div>
+          </section>
+
         </div>
       </main>
 
       {/* Large Preview Modal */}
       {selectedPreview && (
         <PreviewModal
-          template={selectedPreview.template}
+          agent={selectedPreview.agent}
           variant={selectedPreview.variant}
           onClose={() => setSelectedPreview(null)}
         />
@@ -140,88 +231,33 @@ export default function ShowcasePage() {
   );
 }
 
-function TemplateRow({
-  template,
-  fontsReady,
-  onPreview,
-}: {
-  template: TemplateRegistryEntry;
-  fontsReady: boolean;
-  onPreview: (variant: Variant) => void;
-}) {
-  const [width, height] = template.size;
-  const previewScale = 160 / width;
-
-  return (
-    <div className="card" style={{ padding: '20px', marginBottom: '16px' }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '16px',
-      }}>
-        <div>
-          <h3 style={{ fontSize: '18px', fontWeight: 600 }}>{template.name}</h3>
-          <p className="text-muted text-sm">{width} × {height}px · {template.variants.length} variants</p>
-        </div>
-        {template.requires && template.requires.length > 0 && (
-          <div style={{
-            padding: '4px 12px',
-            background: 'var(--surface)',
-            borderRadius: '16px',
-            fontSize: '12px',
-            color: 'var(--text-muted)',
-          }}>
-            Requires: {template.requires.join(', ')}
-          </div>
-        )}
-      </div>
-
-      <div style={{
-        display: 'flex',
-        gap: '16px',
-        overflowX: 'auto',
-        paddingBottom: '8px',
-      }}>
-        {template.variants.map(variant => (
-          <VariantPreview
-            key={variant}
-            template={template}
-            variant={variant}
-            scale={previewScale}
-            fontsReady={fontsReady}
-            onClick={() => onPreview(variant)}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function VariantPreview({
-  template,
+function TemplatePreview({
+  agent,
+  listing,
   variant,
   scale,
   fontsReady,
   onClick,
+  overrides = {},
 }: {
-  template: TemplateRegistryEntry;
+  agent: typeof SHOWCASE_AGENT_1;
+  listing: typeof LISTING_WATERFRONT;
   variant: Variant;
   scale: number;
   fontsReady: boolean;
   onClick: () => void;
+  overrides?: Record<string, string>;
 }) {
-  const Component = template.component;
-  const [width, height] = template.size;
-  const listing = getSampleListingForTemplate(template.type);
+  const width = 1080;
+  const height = 1080;
 
   const templateProps: TemplateProps = {
-    agent: SAMPLE_AGENT,
+    agent,
     listing,
     variant,
-    overrides: {},
+    overrides,
     photos: {
-      hero: SAMPLE_PHOTO,
+      hero: PHOTO_HERO,
       strip: [],
       sub: [],
       row: [],
@@ -234,10 +270,7 @@ function VariantPreview({
   return (
     <div
       onClick={onClick}
-      style={{
-        cursor: 'pointer',
-        flexShrink: 0,
-      }}
+      style={{ cursor: 'pointer' }}
     >
       <div
         style={{
@@ -245,17 +278,18 @@ function VariantPreview({
           height: scaledHeight,
           overflow: 'hidden',
           borderRadius: '8px',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
           opacity: fontsReady ? 1 : 0.5,
           transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+          margin: '0 auto',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.02)';
-          e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)';
+          e.currentTarget.style.transform = 'scale(1.03)';
+          e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.4)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.3)';
+          e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
         }}
       >
         <div
@@ -266,14 +300,14 @@ function VariantPreview({
             transformOrigin: 'top left',
           }}
         >
-          <Component {...templateProps} />
+          <StyleBSquare {...templateProps} />
         </div>
       </div>
       <p style={{
-        fontSize: '12px',
+        fontSize: '13px',
         fontWeight: 500,
         textAlign: 'center',
-        marginTop: '8px',
+        marginTop: '10px',
         textTransform: 'capitalize',
         color: 'var(--text)',
       }}>
@@ -284,25 +318,24 @@ function VariantPreview({
 }
 
 function PreviewModal({
-  template,
+  agent,
   variant,
   onClose,
 }: {
-  template: TemplateRegistryEntry;
+  agent: typeof SHOWCASE_AGENT_1;
   variant: Variant;
   onClose: () => void;
 }) {
-  const Component = template.component;
-  const [width, height] = template.size;
-  const listing = getSampleListingForTemplate(template.type);
+  const width = 1080;
+  const height = 1080;
 
   const templateProps: TemplateProps = {
-    agent: SAMPLE_AGENT,
-    listing,
+    agent,
+    listing: LISTING_WATERFRONT,
     variant,
-    overrides: {},
+    overrides: variant === 'open-house' ? { date: 'Sunday, Oct 15', time: '2-4 PM' } : {},
     photos: {
-      hero: SAMPLE_PHOTO,
+      hero: PHOTO_HERO,
       strip: [],
       sub: [],
       row: [],
@@ -310,9 +343,8 @@ function PreviewModal({
   };
 
   // Scale to fit viewport
-  const maxWidth = Math.min(800, window.innerWidth - 80);
-  const maxHeight = window.innerHeight - 200;
-  const scale = Math.min(maxWidth / width, maxHeight / height, 1);
+  const maxWidth = typeof window !== 'undefined' ? Math.min(700, window.innerWidth - 80) : 700;
+  const scale = maxWidth / width;
   const scaledWidth = width * scale;
   const scaledHeight = height * scale;
 
@@ -333,10 +365,10 @@ function PreviewModal({
     >
       <div style={{ marginBottom: '20px', textAlign: 'center' }}>
         <h2 style={{ fontSize: '24px', fontWeight: 600, color: '#fff', marginBottom: '4px' }}>
-          {template.name}
+          {agent.name}
         </h2>
         <p style={{ color: 'rgba(255,255,255,0.6)', textTransform: 'capitalize' }}>
-          {variant.replace(/-/g, ' ')} · {width} × {height}px
+          {variant.replace(/-/g, ' ')} · 1080 × 1080px
         </p>
       </div>
 
@@ -358,7 +390,7 @@ function PreviewModal({
             transformOrigin: 'top left',
           }}
         >
-          <Component {...templateProps} />
+          <StyleBSquare {...templateProps} />
         </div>
       </div>
 
