@@ -1,19 +1,10 @@
-'use client';
-
-import type { Agent, Listing, Graphic, Photo, Package, PackageType } from './types';
-import { PACKAGE_LIMITS } from './types';
-import { greg, testAgent, demoAgent } from './theme';
-
-// Storage keys
-const STORAGE_KEYS = {
-  agents: 'lg-agents',
-  listings: 'lg-listings',
-  graphics: 'lg-graphics',
-  packages: 'lg-packages',
-} as const;
-
-// Initial seed data
-const INITIAL_AGENTS: Agent[] = [greg, demoAgent, testAgent];
+import { NextResponse } from 'next/server';
+import { seedAgentsIfEmpty } from '@/lib/mongodb/agents';
+import { seedListingsIfEmpty } from '@/lib/mongodb/listings';
+import { seedGraphicsIfEmpty } from '@/lib/mongodb/graphics';
+import { seedPackagesIfEmpty } from '@/lib/mongodb/packages';
+import { greg, testAgent, demoAgent } from '@/lib/theme';
+import type { Listing, Graphic, Package } from '@/lib/types';
 
 const INITIAL_PACKAGES: Package[] = [
   {
@@ -40,7 +31,6 @@ const INITIAL_PACKAGES: Package[] = [
 ];
 
 const INITIAL_LISTINGS: Listing[] = [
-  // 8-pack listings (Apr-Jul 2026) - COMPLETED
   {
     _id: 'listing-8pack-sold',
     agentId: 'greg-caseley',
@@ -130,7 +120,6 @@ const INITIAL_LISTINGS: Listing[] = [
     createdAt: new Date('2026-07-01'),
     updatedAt: new Date('2026-07-29'),
   },
-  // 16-pack listings (Aug 2026 - current)
   {
     _id: 'listing-new-orleans',
     agentId: 'greg-caseley',
@@ -243,7 +232,6 @@ const INITIAL_LISTINGS: Listing[] = [
     createdAt: new Date('2026-08-30'),
     updatedAt: new Date('2026-09-09'),
   },
-  // ========== DEMO AGENT - PENDING LISTINGS ==========
   {
     _id: 'listing-rm-seaside',
     agentId: 'demo-agent',
@@ -319,8 +307,6 @@ const INITIAL_LISTINGS: Listing[] = [
 ];
 
 const INITIAL_GRAPHICS: Graphic[] = [
-  // ========== 8-PACK (Apr-Jul 2026) - COMPLETED ==========
-  // Sold Property
   {
     _id: 'g-8pack-sold',
     listingId: 'listing-8pack-sold',
@@ -333,7 +319,6 @@ const INITIAL_GRAPHICS: Graphic[] = [
     createdAt: new Date('2026-04-30'),
     updatedAt: new Date('2026-04-30'),
   },
-  // Greg Promo
   {
     _id: 'g-8pack-promo',
     listingId: 'listing-8pack-generic',
@@ -346,7 +331,6 @@ const INITIAL_GRAPHICS: Graphic[] = [
     createdAt: new Date('2026-05-02'),
     updatedAt: new Date('2026-05-02'),
   },
-  // Lot for Sale
   {
     _id: 'g-8pack-lot',
     listingId: 'listing-8pack-lot',
@@ -359,7 +343,6 @@ const INITIAL_GRAPHICS: Graphic[] = [
     createdAt: new Date('2026-05-13'),
     updatedAt: new Date('2026-05-13'),
   },
-  // A19 Riverbend - Price Adjustment
   {
     _id: 'g-8pack-riverbend',
     listingId: 'listing-8pack-riverbend',
@@ -372,7 +355,6 @@ const INITIAL_GRAPHICS: Graphic[] = [
     createdAt: new Date('2026-06-09'),
     updatedAt: new Date('2026-06-09'),
   },
-  // 2 Laura Lane - 3 graphics
   {
     _id: 'g-8pack-laura-1',
     listingId: 'listing-8pack-laura',
@@ -409,8 +391,6 @@ const INITIAL_GRAPHICS: Graphic[] = [
     createdAt: new Date('2026-07-29'),
     updatedAt: new Date('2026-07-29'),
   },
-  // ========== 16-PACK (Aug 2026 - current) - ACTIVE ==========
-  // 1104 New Orleans Rd
   {
     _id: 'g-new-orleans-1',
     listingId: 'listing-new-orleans',
@@ -423,7 +403,6 @@ const INITIAL_GRAPHICS: Graphic[] = [
     createdAt: new Date('2026-08-04'),
     updatedAt: new Date('2026-08-04'),
   },
-  // 11 Thompson Road
   {
     _id: 'g-thompson-1',
     listingId: 'listing-thompson',
@@ -436,7 +415,6 @@ const INITIAL_GRAPHICS: Graphic[] = [
     createdAt: new Date('2026-08-10'),
     updatedAt: new Date('2026-08-10'),
   },
-  // 71 Morrison Lane - 4 graphics
   {
     _id: 'g-morrison-1',
     listingId: 'listing-morrison',
@@ -485,7 +463,6 @@ const INITIAL_GRAPHICS: Graphic[] = [
     createdAt: new Date('2026-08-25'),
     updatedAt: new Date('2026-08-25'),
   },
-  // 2 Laura Lane - 2 graphics
   {
     _id: 'g-laura-1',
     listingId: 'listing-laura-lane',
@@ -510,7 +487,6 @@ const INITIAL_GRAPHICS: Graphic[] = [
     createdAt: new Date('2026-08-25'),
     updatedAt: new Date('2026-08-25'),
   },
-  // A19 Riverbend Lane
   {
     _id: 'g-riverbend-1',
     listingId: 'listing-riverbend',
@@ -523,7 +499,6 @@ const INITIAL_GRAPHICS: Graphic[] = [
     createdAt: new Date('2026-08-25'),
     updatedAt: new Date('2026-08-25'),
   },
-  // Salt Wind Way - 2 graphics
   {
     _id: 'g-saltwind-1',
     listingId: 'listing-salt-wind',
@@ -550,326 +525,20 @@ const INITIAL_GRAPHICS: Graphic[] = [
   },
 ];
 
-// Helpers
-function getStorage<T>(key: string, fallback: T[]): T[] {
-  if (typeof window === 'undefined') return fallback;
+export async function POST() {
   try {
-    const stored = localStorage.getItem(key);
-    if (!stored) return fallback;
-    return JSON.parse(stored, (k, v) => {
-      // Revive dates
-      if (k === 'createdAt' || k === 'updatedAt') return new Date(v);
-      return v;
-    });
-  } catch {
-    return fallback;
+    await seedAgentsIfEmpty([greg, demoAgent, testAgent]);
+    await seedPackagesIfEmpty(INITIAL_PACKAGES);
+    await seedListingsIfEmpty(INITIAL_LISTINGS);
+    await seedGraphicsIfEmpty(INITIAL_GRAPHICS);
+
+    return NextResponse.json({ success: true, message: 'Database seeded if empty' });
+  } catch (error) {
+    console.error('[API] POST /api/seed error:', error);
+    return NextResponse.json({ error: 'Failed to seed database' }, { status: 500 });
   }
 }
 
-function setStorage<T>(key: string, data: T[]): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(key, JSON.stringify(data));
-}
-
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
-
-// ============ AGENTS ============
-
-export function getAgents(): Agent[] {
-  return getStorage(STORAGE_KEYS.agents, INITIAL_AGENTS);
-}
-
-export function getAgent(id: string): Agent | null {
-  const agents = getAgents();
-  return agents.find(a => a._id === id) || null;
-}
-
-export function createAgent(agent: Omit<Agent, '_id'> & { _id?: string }): Agent {
-  const agents = getAgents();
-  const newAgent: Agent = {
-    ...agent,
-    _id: agent._id || generateId(),
-  };
-  setStorage(STORAGE_KEYS.agents, [...agents, newAgent]);
-  return newAgent;
-}
-
-export function updateAgent(id: string, updates: Partial<Agent>): Agent | null {
-  const agents = getAgents();
-  const index = agents.findIndex(a => a._id === id);
-  if (index === -1) return null;
-
-  const updated = { ...agents[index], ...updates };
-  agents[index] = updated;
-  setStorage(STORAGE_KEYS.agents, agents);
-  return updated;
-}
-
-export function deleteAgent(id: string): boolean {
-  const agents = getAgents();
-  const filtered = agents.filter(a => a._id !== id);
-  if (filtered.length === agents.length) return false;
-  setStorage(STORAGE_KEYS.agents, filtered);
-  return true;
-}
-
-// ============ LISTINGS ============
-
-export function getListings(agentId?: string): Listing[] {
-  const listings = getStorage(STORAGE_KEYS.listings, INITIAL_LISTINGS);
-  if (agentId) return listings.filter(l => l.agentId === agentId);
-  return listings;
-}
-
-export function getListing(id: string): Listing | null {
-  const listings = getListings();
-  return listings.find(l => l._id === id) || null;
-}
-
-export function createListing(listing: Omit<Listing, '_id' | 'createdAt' | 'updatedAt'>): Listing {
-  const listings = getListings();
-  const now = new Date();
-  const newListing: Listing = {
-    ...listing,
-    _id: generateId(),
-    photos: listing.photos || [],
-    createdAt: now,
-    updatedAt: now,
-  };
-  setStorage(STORAGE_KEYS.listings, [...listings, newListing]);
-  return newListing;
-}
-
-export function updateListing(id: string, updates: Partial<Listing>): Listing | null {
-  const listings = getListings();
-  const index = listings.findIndex(l => l._id === id);
-  if (index === -1) return null;
-
-  const updated: Listing = {
-    ...listings[index],
-    ...updates,
-    updatedAt: new Date(),
-  };
-  listings[index] = updated;
-  setStorage(STORAGE_KEYS.listings, listings);
-  return updated;
-}
-
-export function deleteListing(id: string): boolean {
-  const listings = getListings();
-  const filtered = listings.filter(l => l._id !== id);
-  if (filtered.length === listings.length) return false;
-  setStorage(STORAGE_KEYS.listings, filtered);
-
-  // Also delete associated graphics
-  const graphics = getGraphics();
-  setStorage(STORAGE_KEYS.graphics, graphics.filter(g => g.listingId !== id));
-  return true;
-}
-
-// ============ PHOTOS ============
-
-export function addPhoto(listingId: string, photo: Photo): Listing | null {
-  const listing = getListing(listingId);
-  if (!listing) return null;
-
-  const photos = [...listing.photos, photo];
-  return updateListing(listingId, { photos });
-}
-
-export function updatePhoto(listingId: string, photoId: string, updates: Partial<Photo>): Listing | null {
-  const listing = getListing(listingId);
-  if (!listing) return null;
-
-  const photos = listing.photos.map(p =>
-    p.id === photoId ? { ...p, ...updates } : p
-  );
-  return updateListing(listingId, { photos });
-}
-
-export function updatePhotoFocal(listingId: string, photoId: string, focal: { x: number; y: number }): Listing | null {
-  return updatePhoto(listingId, photoId, { focal });
-}
-
-export function deletePhoto(listingId: string, photoId: string): Listing | null {
-  const listing = getListing(listingId);
-  if (!listing) return null;
-
-  const photos = listing.photos.filter(p => p.id !== photoId);
-  return updateListing(listingId, { photos });
-}
-
-export function reorderPhotos(listingId: string, photoIds: string[]): Listing | null {
-  const listing = getListing(listingId);
-  if (!listing) return null;
-
-  const photoMap = new Map(listing.photos.map(p => [p.id, p]));
-  const reorderedPhotos = photoIds
-    .map((id, index) => {
-      const photo = photoMap.get(id);
-      return photo ? { ...photo, sort: index } : null;
-    })
-    .filter((p): p is Photo => p !== null);
-
-  return updateListing(listingId, { photos: reorderedPhotos });
-}
-
-// ============ GRAPHICS ============
-
-export function getGraphics(listingId?: string): Graphic[] {
-  const graphics = getStorage(STORAGE_KEYS.graphics, INITIAL_GRAPHICS);
-  if (listingId) return graphics.filter(g => g.listingId === listingId);
-  return graphics;
-}
-
-export function getGraphicsByAgent(agentId: string): Graphic[] {
-  const listings = getListings(agentId);
-  const listingIds = new Set(listings.map(l => l._id));
-  return getGraphics().filter(g => listingIds.has(g.listingId));
-}
-
-export function getGraphic(id: string): Graphic | null {
-  const graphics = getGraphics();
-  return graphics.find(g => g._id === id) || null;
-}
-
-export function createGraphic(graphic: Omit<Graphic, '_id' | 'createdAt' | 'updatedAt'>): Graphic {
-  const graphics = getGraphics();
-  const now = new Date();
-  const newGraphic: Graphic = {
-    ...graphic,
-    _id: generateId(),
-    overrides: graphic.overrides || {},
-    photoAssignments: graphic.photoAssignments || {},
-    createdAt: now,
-    updatedAt: now,
-  };
-  setStorage(STORAGE_KEYS.graphics, [...graphics, newGraphic]);
-  return newGraphic;
-}
-
-export function updateGraphic(id: string, updates: Partial<Graphic>): Graphic | null {
-  const graphics = getGraphics();
-  const index = graphics.findIndex(g => g._id === id);
-  if (index === -1) return null;
-
-  const updated: Graphic = {
-    ...graphics[index],
-    ...updates,
-    updatedAt: new Date(),
-  };
-  graphics[index] = updated;
-  setStorage(STORAGE_KEYS.graphics, graphics);
-  return updated;
-}
-
-export function deleteGraphic(id: string): boolean {
-  const graphics = getGraphics();
-  const filtered = graphics.filter(g => g._id !== id);
-  if (filtered.length === graphics.length) return false;
-  setStorage(STORAGE_KEYS.graphics, filtered);
-  return true;
-}
-
-// ============ PACKAGES ============
-
-export function getPackages(agentId?: string): Package[] {
-  const packages = getStorage(STORAGE_KEYS.packages, INITIAL_PACKAGES);
-  if (agentId) return packages.filter(p => p.agentId === agentId);
-  return packages;
-}
-
-export function getPackage(id: string): Package | null {
-  const packages = getPackages();
-  return packages.find(p => p._id === id) || null;
-}
-
-export function getActivePackage(agentId: string): Package | null {
-  const packages = getPackages(agentId);
-  return packages.find(p => p.status === 'active') || null;
-}
-
-export function createPackage(pkg: Omit<Package, '_id'>): Package {
-  const packages = getPackages();
-  const newPackage: Package = {
-    ...pkg,
-    _id: generateId(),
-  };
-  setStorage(STORAGE_KEYS.packages, [...packages, newPackage]);
-  return newPackage;
-}
-
-export function updatePackage(id: string, updates: Partial<Package>): Package | null {
-  const packages = getPackages();
-  const index = packages.findIndex(p => p._id === id);
-  if (index === -1) return null;
-
-  const updated = { ...packages[index], ...updates };
-  packages[index] = updated;
-  setStorage(STORAGE_KEYS.packages, packages);
-  return updated;
-}
-
-export function getPackageUsage(packageId: string): { used: number; limit: number } {
-  const pkg = getPackage(packageId);
-  if (!pkg) return { used: 0, limit: 0 };
-
-  const graphics = getGraphics().filter(g => g.packageId === packageId);
-  return {
-    used: graphics.length,
-    limit: PACKAGE_LIMITS[pkg.type],
-  };
-}
-
-// ============ AGGREGATIONS ============
-
-export function getAgentStats(agentId: string): { listings: number; graphics: number; packageUsage?: { used: number; limit: number } } {
-  const listings = getListings(agentId);
-  const graphics = getGraphicsByAgent(agentId);
-  const activePackage = getActivePackage(agentId);
-
-  const result: { listings: number; graphics: number; packageUsage?: { used: number; limit: number } } = {
-    listings: listings.length,
-    graphics: graphics.length,
-  };
-
-  if (activePackage) {
-    result.packageUsage = getPackageUsage(activePackage._id);
-  }
-
-  return result;
-}
-
-// ============ FULL GRAPHIC DATA ============
-
-export type FullGraphicData = {
-  graphic: Graphic;
-  listing: Listing;
-  agent: Agent;
-  coAgent?: Agent;
-};
-
-export function getFullGraphicData(graphicId: string): FullGraphicData | null {
-  const graphic = getGraphic(graphicId);
-  if (!graphic) return null;
-
-  const listing = getListing(graphic.listingId);
-  if (!listing) return null;
-
-  const agent = getAgent(listing.agentId);
-  if (!agent) return null;
-
-  return { graphic, listing, agent };
-}
-
-// ============ RESET ============
-
-export function resetToInitial(): void {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem(STORAGE_KEYS.agents);
-  localStorage.removeItem(STORAGE_KEYS.listings);
-  localStorage.removeItem(STORAGE_KEYS.graphics);
-  localStorage.removeItem(STORAGE_KEYS.packages);
+export async function GET() {
+  return NextResponse.json({ message: 'POST to this endpoint to seed the database' });
 }

@@ -9,6 +9,8 @@ type StageProps = {
   theme: Theme;
   children: React.ReactNode;
   className?: string;
+  /** Override the stage ground. Light-mode templates pass var(--theme-surface). */
+  background?: string;
 };
 
 /**
@@ -16,7 +18,7 @@ type StageProps = {
  * It applies theme CSS variables and clips overflow.
  * The #stage id is used by Puppeteer to screenshot this element.
  */
-export function Stage({ width, height, theme, children, className = '' }: StageProps) {
+export function Stage({ width, height, theme, children, className = '', background }: StageProps) {
   return (
     <div
       id="stage"
@@ -26,7 +28,7 @@ export function Stage({ width, height, theme, children, className = '' }: StageP
         height: `${height}px`,
         position: 'relative',
         overflow: 'hidden',
-        backgroundColor: theme.primary,
+        background: background ?? theme.primary,
         ...themeStyle(theme),
       }}
     >

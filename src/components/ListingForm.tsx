@@ -116,6 +116,7 @@ export function ListingForm({ agentId, listing }: Props) {
       baths: formData.baths ? parseFloat(formData.baths) : undefined,
       acres: formData.acres ? parseFloat(formData.acres) : undefined,
       photos,
+      status: listing?.status ?? 'pending' as const,
     };
 
     try {

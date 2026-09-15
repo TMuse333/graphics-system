@@ -1,0 +1,194 @@
+{
+  "$comment": "Faithful config description of the built piece '71 Morrison Lane - Open House Reel.html'. Every value here is the actual value in the working build. Cue offsets are RELATIVE TO SCENE START unless a scene name is given explicitly; negative offsets mean 'before that scene starts'.",
+
+  "id": "open-house-reel",
+  "name": "Open House (Reel)",
+  "kind": "motion",
+  "category": "social",
+  "size": [1080, 1920],
+  "safeZone": "reels",
+  "playback": { "mode": "loop" },
+
+  "primitives": {
+    "$comment": "The complete motion vocabulary. Nothing in the piece uses anything else.",
+    "enter": {
+      "args": ["at", "dist"],
+      "does": "opacity 0->1 over 0.42s (easeOutQuad) and translateY dist->0 over 0.62s (easeOutCubic)"
+    },
+    "draw": {
+      "args": ["from", "to"],
+      "does": "scalar 0->1 over the span (easeInOutCubic); multiply into a width to wipe a rule or bar across"
+    },
+    "leave": {
+      "args": ["at"],
+      "does": "opacity 1->0 over 0.34s (easeInQuad)"
+    },
+    "riseOut": {
+      "args": ["at"],
+      "does": "translateY 0->-40 over 0.4s (easeInQuad); pairs with leave for an upward exit"
+    }
+  },
+
+  "slots": {
+    "$comment": "Fixed layout positions. A block declares a slot rather than coordinates.",
+    "eyebrow": {
+      "x": 84, "y": 1004, "minWidth": 308,
+      "plate": "rgba(15,15,30,.9)", "padding": "15px 24px 16px",
+      "$why": "gold at 31px cannot clear 4.5:1 over the photo at any workable scrim alpha, so it rides an opaque plate"
+    },
+    "body": { "x": 84, "y": 1136, "maxWidth": 836 },
+    "band": { "x": 0, "y": 986, "width": 1080, "$why": "lifted from 1105 so the CTA bar bottoms at 1494, clear of the reels caption band" },
+    "tiles": { "right": 160, "tops": [300, 580], "size": [300, 212], "$why": "right edge pinned at 920, inside the reels action column" }
+  },
+
+  "scenes": [
+    { "name": "Arrive", "dur": 2.6, "desc": "The house appears and the words Open House settle over it" },
+    { "name": "When",   "dur": 2.6, "desc": "The date and time take over the frame" },
+    { "name": "Where",  "dur": 2.6, "desc": "The address and room details arrive with two interior photos" },
+    { "name": "Close",  "dur": 2.8, "desc": "The agent contact band holds to the end" }
+  ],
+  "authoredTotal": 10.6,
+
+  "globals": [
+    {
+      "type": "heroPushIn",
+      "asset": "listing.photoUrl",
+      "fit": "cover",
+      "focus": "center 42%",
+      "scale": { "from": 1.05, "to": 1.2, "ease": "linear", "span": "full" },
+      "translateY": { "from": -14, "to": 14, "ease": "easeInOutSine", "span": "full" },
+      "transformOrigin": "50% 45%"
+    },
+    {
+      "type": "scrims",
+      "top": { "rect": [0, 0, 1080, 420], "gradient": "rgba(15,15,30,.85) -> transparent" },
+      "lower": {
+        "rect": [0, 760, 1080, 1160],
+        "alpha": { "from": 0.72, "to": 0.96, "from_at": "Arrive+0.6", "to_at": "When", "ease": "easeOutQuad" },
+        "$why": "deepens once type occupies the lower third"
+      }
+    },
+    {
+      "type": "loopVeil",
+      "color": "#0f0f1e",
+      "out": { "from": 0.08, "to": 0.5, "ease": "easeOutQuad" },
+      "in": { "from": "total-0.52", "to": "total-0.15", "ease": "easeInQuad" },
+      "$why": "holds pure black at both ends so the continuous push-in wraps invisibly"
+    }
+  ],
+
+  "blocks": [
+    {
+      "slot": "eyebrow", "type": "eyebrowPlate",
+      "beats": [
+        { "scene": "Arrive", "text": "{listing.city}", "enter": { "at": 0.25, "dist": 22 }, "rule": { "at": 0.75, "over": 0.75, "width": 260 }, "exit": { "scene": "When", "at": -0.2 } },
+        { "scene": "When",   "text": "Mark your calendar", "enter": { "at": 0.05, "dist": 22 }, "rule": { "at": 0.1, "over": 0.75, "width": 260 }, "exit": { "scene": "Where", "at": -0.2 } },
+        { "scene": "Where",  "text": "The property", "enter": { "at": 0.05, "dist": 22 }, "rule": { "at": 0.1, "over": 0.75, "width": 260 }, "exit": { "scene": "Close", "at": -0.5 } }
+      ],
+      "style": { "font": "narrow", "size": 31, "weight": 700, "tracking": 6.5, "case": "upper", "color": "accent" }
+    },
+
+    {
+      "scene": "Arrive", "slot": "body", "type": "headline",
+      "lines": ["{content.headline.0}", "{content.headline.1}"],
+      "style": { "font": "display", "size": 132, "color": "cream", "case": "upper", "lineHeight": 0.9, "tracking": -3 },
+      "enter": [{ "at": 0.4, "dist": 54 }, { "at": 0.56, "dist": 54 }],
+      "exit": { "scene": "When", "at": -0.3, "with": ["leave", "riseOut"] }
+    },
+
+    {
+      "scene": "When", "slot": "body", "type": "headline",
+      "lines": ["{event.dayName}", "{event.monthDay}"],
+      "style": { "font": "display", "size": 124, "color": "cream", "case": "upper", "lineHeight": 0.9, "tracking": -3 },
+      "enter": [{ "at": 0.18, "dist": 54 }],
+      "exit": { "scene": "Where", "at": -0.3, "with": ["leave", "riseOut"] }
+    },
+    {
+      "scene": "When", "slot": "body", "type": "accentText", "offsetY": 26,
+      "text": "{event.timeRange}",
+      "style": { "font": "display", "size": 96, "color": "accent", "tracking": -1 },
+      "enter": [{ "at": 0.46, "dist": 30 }],
+      "scale": { "from": 0.9, "to": 1, "at": 0.46, "over": 0.5, "ease": "easeOutCubic", "origin": "0 50%" },
+      "$why": "easeOutBack overshoot pushed this 1px past the safe line; easeOutCubic instead",
+      "exit": { "scene": "Where", "at": -0.3, "with": ["leave", "riseOut"] }
+    },
+
+    {
+      "scene": "Where", "slot": "body", "type": "headline",
+      "lines": ["{listing.addressLine1}", "{listing.addressLine2}"],
+      "style": { "font": "display", "size": 112, "color": "cream", "case": "upper", "lineHeight": 0.9, "tracking": -3 },
+      "enter": [{ "at": 0.18, "dist": 54 }],
+      "exit": { "scene": "Close", "at": -0.3, "with": ["leave", "riseOut"] }
+    },
+    {
+      "scene": "Where", "slot": "body", "type": "chipRow", "offsetY": 34,
+      "items": ["{listing.beds} Bed", "{listing.baths} Bath", "{listing.acres} Acres"],
+      "style": { "font": "narrow", "size": 32, "weight": 700, "tracking": 3, "case": "upper", "border": "2px accent", "color": "cream", "padding": "13px 26px", "gap": 18, "nowrap": true },
+      "enter": { "at": 0.6, "dist": 26, "stagger": 0.12 },
+      "exit": { "scene": "Close", "at": -0.3, "with": ["leave", "riseOut"] }
+    },
+    {
+      "scene": "Where", "slot": "tiles", "type": "photoTiles",
+      "assets": ["{listing.interiorUrls.0}", "{listing.interiorUrls.1}"],
+      "style": { "border": "3px accent", "shadow": "0 22px 60px rgba(0,0,0,.55)" },
+      "enter": { "at": 0.3, "dist": 64, "axis": "y", "over": 0.7, "stagger": 0.16 },
+      "$why": "rises vertically rather than flying in from x:+340, which crossed the action column mid-entrance",
+      "exit": { "scene": "Close", "at": -0.3, "with": ["leave"] }
+    },
+
+    {
+      "scene": "Close", "slot": "band", "type": "agentBand",
+      "enter": [{ "at": -0.1, "dist": 0 }],
+      "$why": "dist 0 is deliberate: rising from below dipped the CTA bar into the caption band for ~0.7s",
+      "bar": { "at": 0.15, "over": 0.8, "width": 1080, "color": "accent" },
+      "portrait": {
+        "asset": "agent.headshotUrl",
+        "size": [202, 260],
+        "render": "cssBackground",
+        "fill": "cream",
+        "border": "3px accent",
+        "position": "50% 0%",
+        "$why": "transparent cutout: renders as background-image (an <img> failed to composite), on a light fill because a dark-suited subject vanishes on the near-black band"
+      },
+      "fields": [
+        { "text": "Hosted by", "style": { "font": "narrow", "size": 28, "tracking": 6, "case": "upper", "color": "accent" } },
+        { "text": "{agent.name}", "style": { "font": "display", "size": 76, "color": "cream", "tracking": -2 } },
+        { "text": "{agent.title} \u00b7 {agent.region}", "style": { "font": "narrow", "size": 32, "color": "mute" } },
+        { "text": "{agent.phone}\n{agent.website}", "style": { "font": "display", "size": 38, "color": "cream", "lineHeight": 1.42 } }
+      ],
+      "cta": {
+        "text": "{content.closingLine}",
+        "style": { "font": "display", "size": 44, "bg": "accent", "color": "ink", "case": "upper", "align": "center", "padding": "26px 0" },
+        "enter": { "at": 0.5, "dist": 0 }
+      },
+      "exit": { "at": "total-0.75", "with": ["leave"] }
+    }
+  ],
+
+  "tweaks": [
+    { "key": "headline", "type": "text", "default": "OPEN HOUSE" },
+    { "key": "closingLine", "type": "text", "default": "No appointment needed" },
+    { "key": "accent", "type": "color", "default": "#d4af37", "options": ["#d4af37", "#e8cf7a", "#b8962f", "#c9a227"] }
+  ],
+
+  "theme": {
+    "$comment": "Same --theme-* contract as the static templates.",
+    "ink": "#0f0f1e",
+    "accent": "#d4af37",
+    "accentLight": "#e8cf7a",
+    "cream": "#f5f5f5",
+    "mute": "#a8a8b8",
+    "fontDisplay": "Archivo 900",
+    "fontNarrow": "Archivo Narrow 600/700"
+  },
+
+  "validation": {
+    "$comment": "This is the part worth building into the app. All the defects in the hand-built version were entrance animations violating a zone mid-transition while their settled positions were legal.",
+    "safeZones": {
+      "reels": { "maxRight": 940, "maxBottom": 1500, "$note": "action column x>940; caption band y>1620 and grows with caption length" },
+      "stories": { "maxRight": 1010, "maxBottom": 1670 }
+    },
+    "rule": "Sweep 0..authoredTotal at 0.05s. For every block, at every sample, with entrance and exit transforms applied, assert right <= maxRight and bottom <= maxBottom. Full-bleed bands (width >= 1080) are exempt on the right edge only \u2014 never on the bottom, because they carry centered text.",
+    "measured": { "worstRight": 920, "worstBottom": 1500, "violations": 0, "samples": 213 }
+  }
+}

@@ -8,6 +8,12 @@ export type Theme = {
   fontDisplay: string;  // headlines            (Greg: Archivo)
   fontNarrow: string;   // eyebrows, labels     (Greg: Archivo Narrow)
   fontScript: string;   // signature            (Greg: Yellowtail)
+  // Light ground tokens (for content templates on cream backgrounds)
+  surface?: string;      // page ground      (#f6f4ef)
+  surfaceAlt?: string;   // cards on surface (#ffffff)
+  ink?: string;          // body text on surface
+  inkSoft?: string;      // secondary text on surface
+  accentText?: string;   // accent-colored TEXT on light grounds
 };
 
 export type Agent = {
@@ -145,6 +151,57 @@ export type TemplateProps = {
   };
   coAgent?: Agent;  // for dual-agent templates
 };
+
+// ============ CONTENT TEMPLATES ============
+// For templates that have no Listing at all (education, market stats, testimonial, intro)
+
+export type ContentPoint = { title: string; body: string };
+
+export type ContentStat = {
+  value: string;
+  label: string;
+  delta?: string;               // "+2.1% vs last year"
+  direction?: 'up' | 'down';
+};
+
+export type ContentData = {
+  kicker?: string;
+  title?: string;               // "|" splits into two display lines
+  subtitle?: string;
+  period?: string;              // "August 2026"
+  points?: ContentPoint[];      // education
+  stats?: ContentStat[];        // market stats / stat board
+  quote?: string;               // testimonial / type poster
+  emphasis?: string;            // substring of quote to accent
+  attribution?: string;
+  attributionMeta?: string;
+  rating?: number;              // 1-5
+  closing?: string;
+  footnote?: string;
+};
+
+export type ContentTemplateProps = {
+  agent: Agent;
+  content: ContentData;
+};
+
+export type ContentFieldType =
+  | 'kicker' | 'title' | 'subtitle' | 'period'
+  | 'points' | 'stats' | 'quote' | 'emphasis'
+  | 'attribution' | 'attributionMeta' | 'rating'
+  | 'closing' | 'footnote';
+
+/**
+ * Fills light tokens for themes saved before they existed.
+ */
+export const resolveTheme = (t: Theme): Required<Theme> => ({
+  ...t,
+  surface: t.surface ?? '#f6f4ef',
+  surfaceAlt: t.surfaceAlt ?? '#ffffff',
+  ink: t.ink ?? '#16162c',
+  inkSoft: t.inkSoft ?? '#4a4a5e',
+  accentText: t.accentText ?? t.ink ?? '#16162c',
+} as Required<Theme>);
 
 // Bulk generation types
 export type GenerationQueueItem = {

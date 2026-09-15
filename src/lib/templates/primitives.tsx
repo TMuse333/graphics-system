@@ -38,7 +38,7 @@ export function Hero({ photo }: { photo?: Photo }) {
         position: 'absolute',
         inset: 0,
         background: '#1e293b',
-        backgroundImage: photo?.url ? `url("${photo.url}")` : undefined,
+        backgroundImage: photo ? `url("${photo.url}")` : undefined,
         backgroundPosition: focalCss(photo),
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
@@ -236,7 +236,7 @@ export function PhotoStrip({ photos = [] }: { photos?: Photo[] }) {
     >
       {shots.map((p, i) => (
         <div
-          key={p.id ?? i}
+          key={`strip-${i}`}
           style={{
             width: 246,
             height: 168,
@@ -313,10 +313,15 @@ export function AgentBand({
           style={{
             position: 'absolute',
             left: 56,
-            bottom: 56,
-            width: 128,
-            height: 128,
-            background: `url("${logoUrl}") center/contain no-repeat`,
+            bottom: 62,
+            width: 156,
+            height: 112,
+            // Agent marks are typically dark ink on a white ground, so they
+            // need a light plate on the band rather than a knockout filter.
+            background: `#fff url("${logoUrl}") center/contain no-repeat content-box`,
+            borderRadius: 4,
+            padding: 9,
+            boxShadow: '0 6px 18px rgba(0,0,0,.28)',
           }}
         />
       )}
@@ -366,21 +371,21 @@ export function AgentBand({
           </span>
         </div>
       </div>
-      <div
-        style={{
-          position: 'absolute',
-          right: -18,
-          bottom: -42,
-          width: 338,
-          height: 338,
-          borderRadius: '50%',
-          border: '7px solid var(--theme-accent)',
-          background: headshotUrl
-            ? `#dfe3ea url("${headshotUrl}") center 8%/cover no-repeat`
-            : '#ffffff',
-          boxShadow: '0 16px 40px rgba(0,0,0,.5)',
-        }}
-      />
+      {headshotUrl && (
+        <div
+          style={{
+            position: 'absolute',
+            right: -18,
+            bottom: -42,
+            width: 338,
+            height: 338,
+            borderRadius: '50%',
+            border: '7px solid var(--theme-accent)',
+            background: `#dfe3ea url("${headshotUrl}") center 8%/cover no-repeat`,
+            boxShadow: '0 16px 40px rgba(0,0,0,.5)',
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -402,4 +407,130 @@ export function metaLine(listing: {
     if (listing.acres) parts.push(`${listing.acres} Acres`);
   }
   return parts.join(' \u00b7 ');
+}
+
+// ============ LAYOUT PATTERNS ============
+
+/**
+ * Sandwich Layout
+ *
+ * The "sandwich" pattern stacks bands instead of overlaying:
+ *   Header → Clean Photo Window → Spec Bar → Footer
+ *
+ * Nothing ever covers the photo. This came out of a problem on an earlier
+ * listing graphic where price and address sat on top of the house photo.
+ *
+ * Use this for any listing piece where the photography should be the focus.
+ */
+export type SandwichLayoutProps = {
+  width: number;
+  height: number;
+  header: React.ReactNode;
+  headerHeight: number;
+  photo: Photo | undefined;
+  specBar?: React.ReactNode;
+  specBarHeight?: number;
+  footer: React.ReactNode;
+  footerHeight: number;
+  /** Gap between photo and spec bar. Defaults to 0. */
+  gap?: number;
+  /** Background color for the spec bar area. */
+  specBarBg?: string;
+};
+
+export function SandwichLayout({
+  width,
+  height,
+  header,
+  headerHeight,
+  photo,
+  specBar,
+  specBarHeight = 0,
+  footer,
+  footerHeight,
+  gap = 0,
+  specBarBg = 'var(--theme-primary)',
+}: SandwichLayoutProps) {
+  const photoHeight = height - headerHeight - specBarHeight - footerHeight - gap;
+
+  return (
+    <div style={{ position: 'relative', width, height }}>
+      {/* Header band */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: headerHeight,
+        }}
+      >
+        {header}
+      </div>
+
+      {/* Clean photo window - NEVER overlaid */}
+      <div
+        style={{
+          position: 'absolute',
+          top: headerHeight,
+          left: 0,
+          width: '100%',
+          height: photoHeight,
+          background: '#1e293b',
+          backgroundImage: photo ? `url("${photo.url}")` : undefined,
+          backgroundPosition: focalCss(photo),
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
+
+      {/* Spec bar */}
+      {specBar && specBarHeight > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: headerHeight + photoHeight + gap,
+            left: 0,
+            width: '100%',
+            height: specBarHeight,
+            background: specBarBg,
+          }}
+        >
+          {specBar}
+        </div>
+      )}
+
+      {/* Footer band */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          height: footerHeight,
+        }}
+      >
+        {footer}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Alternating Ground
+ *
+ * For carousels that alternate between light and dark grounds.
+ * Pass the frame index to get the appropriate background.
+ */
+export function getAlternatingGround(
+  frameIndex: number,
+  lightGround: string = 'var(--theme-surface)',
+  darkGround: string = 'var(--theme-primary)'
+): { background: string; textColor: string; accentUse: 'fill' | 'text' } {
+  const isLight = frameIndex % 2 === 0;
+  return {
+    background: isLight ? lightGround : darkGround,
+    textColor: isLight ? 'var(--theme-ink)' : '#fff',
+    accentUse: isLight ? 'text' : 'fill',
+  };
 }
