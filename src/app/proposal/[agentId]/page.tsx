@@ -185,7 +185,7 @@ export default function ProposalPage() {
           position: 'sticky',
           top: 16,
           margin: '16px 24px',
-          padding: '14px 24px',
+          padding: '12px 24px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -196,9 +196,62 @@ export default function ProposalPage() {
         <span className="gradient-text" style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>
           LISTING GRAPHICS
         </span>
-        <span style={{ fontSize: 14, color: 'var(--text-70)' }}>
-          Proposal for <span style={{ color: 'var(--p-accent)', fontWeight: 600 }}>{agent.name}</span>
-        </span>
+
+        {/* Navigation */}
+        <nav style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+          <a
+            href="#addition"
+            style={{ fontSize: 13, color: 'var(--text-60)', textDecoration: 'none', transition: 'color 0.2s' }}
+            onMouseOver={(e) => e.currentTarget.style.color = 'var(--text-90)'}
+            onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-60)'}
+          >
+            The Upgrade
+          </a>
+          <a
+            href="#formats"
+            style={{ fontSize: 13, color: 'var(--text-60)', textDecoration: 'none', transition: 'color 0.2s' }}
+            onMouseOver={(e) => e.currentTarget.style.color = 'var(--text-90)'}
+            onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-60)'}
+          >
+            Formats
+          </a>
+          <a
+            href="#dashboard"
+            style={{ fontSize: 13, color: 'var(--text-60)', textDecoration: 'none', transition: 'color 0.2s' }}
+            onMouseOver={(e) => e.currentTarget.style.color = 'var(--text-90)'}
+            onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-60)'}
+          >
+            Dashboard
+          </a>
+          <a
+            href="#pricing"
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: '#fff',
+              background: 'linear-gradient(135deg, var(--p-accent), #059669)',
+              padding: '8px 16px',
+              borderRadius: 8,
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(16, 185, 129, 0.3)';
+            }}
+          >
+            Get Started
+            <ArrowRight style={{ width: 14, height: 14 }} />
+          </a>
+        </nav>
       </header>
 
       <main style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px' }}>
@@ -378,7 +431,7 @@ export default function ProposalPage() {
           </div>
 
           {/* The Addition */}
-          <div className="animate-fadeInUp animation-delay-300" style={{ textAlign: 'center', marginBottom: 48 }}>
+          <div id="addition" className="animate-fadeInUp animation-delay-300" style={{ textAlign: 'center', marginBottom: 48, scrollMarginTop: 100 }}>
             {/* Gold upgrade banner */}
             <div
               style={{
@@ -649,6 +702,7 @@ export default function ProposalPage() {
         </section>
         {/* ============ 5. THE FORMATS ============ */}
         <section
+          id="formats"
           className="animate-fadeInUp"
           style={{
             position: 'relative',
@@ -657,6 +711,7 @@ export default function ProposalPage() {
             background: 'linear-gradient(180deg, rgba(var(--p-warm-rgb), 0.08) 0%, transparent 100%)',
             borderTop: '1px solid rgba(var(--p-warm-rgb), 0.2)',
             borderBottom: '1px solid rgba(var(--p-warm-rgb), 0.1)',
+            scrollMarginTop: 80,
           }}
         >
           {/* Warm glow at top */}
@@ -780,7 +835,7 @@ export default function ProposalPage() {
         <main style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px' }}>
 
         {/* ============ 6. THE DASHBOARD ============ */}
-        <section className="proposal-section animate-fadeInUp">
+        <section id="dashboard" className="proposal-section animate-fadeInUp" style={{ scrollMarginTop: 80 }}>
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <span className="pill-badge" style={{ background: 'rgba(var(--p-primary-rgb), 0.15)', border: '1px solid rgba(var(--p-primary-rgb), 0.3)', color: 'var(--p-primary)', marginBottom: 16 }}>
               <BarChart3 style={{ width: 14, height: 14 }} />
@@ -962,7 +1017,7 @@ export default function ProposalPage() {
         )}
 
         {/* ============ 6. THE OFFER ============ */}
-        <section className="proposal-section animate-fadeInUp" style={{ paddingBottom: 80 }}>
+        <section id="pricing" className="proposal-section animate-fadeInUp" style={{ paddingBottom: 80, scrollMarginTop: 80 }}>
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <span className="pill-badge pill-badge-accent" style={{ marginBottom: 16 }}>
               <Target style={{ width: 14, height: 14 }} />

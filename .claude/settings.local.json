@@ -5,7 +5,8 @@
       "Bash(find:*)",
       "Bash(npm install:*)",
       "Bash(curl:*)",
-      "Bash(stripe prices create:*)"
+      "Bash(stripe prices create:*)",
+      "Bash(git diff:*)"
     ]
   }
 }
