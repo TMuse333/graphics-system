@@ -81,7 +81,7 @@ export default function ProcessExplainer({ agent, content }: ContentTemplateProp
             <b />
           </div>
           <div className="pe-wm">
-            RE<em>/</em>MAX<span>NOVA</span>
+            RE<em>/</em>MAX<span>HARBOURSIDE</span>
           </div>
         </div>
       </div>

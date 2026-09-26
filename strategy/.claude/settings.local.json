@@ -3,7 +3,12 @@
     "allow": [
       "Bash(git push:*)",
       "Bash(npm run build:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(node -e:*)",
+      "Bash(npm install:*)",
+      "Bash(node -r dotenv/config -e:*)",
+      "Bash(curl:*)",
+      "Bash(npx tsx scripts/update-token.ts)"
     ]
   }
 }

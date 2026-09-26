@@ -101,7 +101,7 @@ export default function ComingSoon({ agent, listing, content }: ComingSoonProps)
             <b />
           </div>
           <div className="cs-wm">
-            RE<em>/</em>MAX<span>NOVA</span>
+            RE<em>/</em>MAX<span>HARBOURSIDE</span>
           </div>
         </div>
       </div>

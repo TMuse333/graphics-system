@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(find:*)",
+      "Bash(npm install:*)",
+      "Bash(curl:*)",
+      "Bash(stripe prices create:*)"
     ]
   }
 }

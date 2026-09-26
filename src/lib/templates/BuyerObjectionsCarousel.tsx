@@ -5,7 +5,7 @@
  *
  * Seven-frame carousel: cover, five objection slides, closing CTA.
  * Alternating light/dark grounds create swipe rhythm.
- * RE/MAX Nova footer included.
+ * RE/MAX Harbourside footer included.
  */
 import * as React from 'react';
 
@@ -139,7 +139,7 @@ const RemaxFooter = () => (
       <b />
     </div>
     <div className="cm-wm">
-      RE<em>/</em>MAX<span>NOVA</span>
+      RE<em>/</em>MAX<span>HARBOURSIDE</span>
     </div>
   </div>
 );
