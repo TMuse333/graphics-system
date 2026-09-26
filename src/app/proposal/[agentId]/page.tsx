@@ -205,6 +205,22 @@ export default function ProposalPage() {
 
         {/* ============ 1. VIDEO INTRO ============ */}
         <section className="proposal-section animate-fadeInUp" style={{ textAlign: 'center', paddingTop: 40 }}>
+          {/* Personal greeting */}
+          <div style={{ marginBottom: 32 }}>
+            <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 12 }}>
+              Hey <span style={{ color: 'var(--p-accent)' }}>{agent.name.split(' ')[0]}</span>,
+            </h1>
+            <p style={{ fontSize: 17, color: 'var(--text-70)', maxWidth: 500, margin: '0 auto', lineHeight: 1.6 }}>
+              I&apos;ve been thinking about how to get you more consistent visibility — without adding anything to your day.
+            </p>
+            <p style={{ fontSize: 17, color: 'var(--text-70)', maxWidth: 500, margin: '12px auto 0', lineHeight: 1.6 }}>
+              I&apos;ve made this solution for you to continue helping you grow.
+            </p>
+          </div>
+        </section>
+
+        {/* ============ 2. VIDEO ============ */}
+        <section className="proposal-section animate-fadeInUp" style={{ textAlign: 'center' }}>
           {proposal.videoUrl ? (
             <div
               className="glass-card glass-card-glow"
@@ -363,7 +379,26 @@ export default function ProposalPage() {
 
           {/* The Addition */}
           <div className="animate-fadeInUp animation-delay-300" style={{ textAlign: 'center', marginBottom: 48 }}>
-            <span className="pill-badge pill-badge-primary" style={{ marginBottom: 16 }}>
+            {/* Gold upgrade banner */}
+            <div
+              style={{
+                background: 'linear-gradient(135deg, var(--p-warm), #d97706)',
+                padding: '10px 24px',
+                borderRadius: 8,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                marginBottom: 20,
+                boxShadow: 'var(--glow-md) rgba(var(--p-warm-rgb), 0.4)',
+              }}
+            >
+              <Sparkles style={{ width: 18, height: 18, color: '#fff' }} />
+              <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.5, color: '#fff' }}>
+                The New Upgrade
+              </span>
+            </div>
+
+            <span className="pill-badge pill-badge-primary" style={{ marginBottom: 16, display: 'flex' }}>
               <Lightbulb style={{ width: 14, height: 14 }} />
               The Addition
             </span>
@@ -371,7 +406,7 @@ export default function ProposalPage() {
               Answer the questions <span style={{ color: 'var(--p-primary)' }}>they already have</span>.
             </h2>
             <p style={{ fontSize: 17, color: 'var(--text-50)', maxWidth: 550, margin: '0 auto 32px', lineHeight: 1.6 }}>
-              Carousels go out <strong style={{ color: 'var(--p-primary)' }}>Tuesday + Thursday</strong> — filling the gaps between listings with helpful content.
+              Carousels go out <strong style={{ color: 'var(--p-primary)' }}>twice a week</strong> — filling the gaps between listings with helpful content.
             </p>
 
             {/* Question cards grid */}
@@ -574,36 +609,65 @@ export default function ProposalPage() {
         </section>
 
         {/* ============ 4. WHAT IT LOOKS LIKE (Calendar) ============ */}
-        <section className="proposal-section animate-fadeInUp">
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <span className="pill-badge pill-badge-primary" style={{ marginBottom: 16 }}>
-              <Calendar style={{ width: 14, height: 14 }} />
-              What It Looks Like
-            </span>
-            <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 12, marginTop: 16 }}>
-              You manage listings. <span className="gradient-text">I manage content.</span>
-            </h2>
-            <p style={{ fontSize: 17, color: 'var(--text-50)', maxWidth: 600, margin: '0 auto', lineHeight: 1.6 }}>
-              Carousels go out <strong style={{ color: 'var(--p-primary)' }}>Tuesday + Thursday</strong> every week — {proposal.carouselsCount} per month, consistent rhythm.
-            </p>
-          </div>
+        </main>
+        <section
+          className="animate-fadeInUp"
+          style={{
+            position: 'relative',
+            padding: '64px 24px',
+            margin: '48px 0',
+            background: 'linear-gradient(180deg, rgba(var(--p-primary-rgb), 0.08) 0%, transparent 100%)',
+            borderTop: '1px solid rgba(var(--p-primary-rgb), 0.2)',
+            borderBottom: '1px solid rgba(var(--p-primary-rgb), 0.1)',
+          }}
+        >
+          {/* Blue glow at top */}
+          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 400, height: 200, background: 'rgba(var(--p-primary-rgb), 0.15)', filter: 'blur(80px)', pointerEvents: 'none' }} />
 
-          <ProposalCalendar posts={SAMPLE_CALENDAR} accentColor={agent.theme.accent} />
+          <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: 32 }}>
+              <span className="pill-badge pill-badge-primary" style={{ marginBottom: 16 }}>
+                <Calendar style={{ width: 14, height: 14 }} />
+                What It Looks Like
+              </span>
+              <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 12, marginTop: 16 }}>
+                You manage listings. <span className="gradient-text">I manage content.</span>
+              </h2>
+              <p style={{ fontSize: 17, color: 'var(--text-50)', maxWidth: 600, margin: '0 auto', lineHeight: 1.6 }}>
+                Carousels go out <strong style={{ color: 'var(--p-primary)' }}>twice a week</strong> — {proposal.carouselsCount} per month, consistent rhythm.
+              </p>
+            </div>
 
-          <div style={{ display: 'flex', gap: 24, marginTop: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <CalendarLegend color={agent.theme.accent} label="Your Listings" />
-            <CalendarLegend color="var(--p-primary)" label="Answer Carousel" />
-            <CalendarLegend color="var(--p-secondary)" label="Market Stats" />
+            <ProposalCalendar posts={SAMPLE_CALENDAR} accentColor={agent.theme.accent} />
+
+            <div style={{ display: 'flex', gap: 24, marginTop: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <CalendarLegend color={agent.theme.accent} label="Your Listings" />
+              <CalendarLegend color="var(--p-primary)" label="Answer Carousel" />
+              <CalendarLegend color="var(--p-secondary)" label="Market Stats" />
+            </div>
           </div>
         </section>
-
         {/* ============ 5. THE FORMATS ============ */}
-        <section className="proposal-section animate-fadeInUp">
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <span className="pill-badge" style={{ background: 'rgba(var(--p-warm-rgb), 0.15)', border: '1px solid rgba(var(--p-warm-rgb), 0.3)', color: 'var(--p-warm)', marginBottom: 16 }}>
-              <Sparkles style={{ width: 14, height: 14 }} />
-              The Formats
-            </span>
+        <section
+          className="animate-fadeInUp"
+          style={{
+            position: 'relative',
+            padding: '64px 24px',
+            margin: '0 0 48px 0',
+            background: 'linear-gradient(180deg, rgba(var(--p-warm-rgb), 0.08) 0%, transparent 100%)',
+            borderTop: '1px solid rgba(var(--p-warm-rgb), 0.2)',
+            borderBottom: '1px solid rgba(var(--p-warm-rgb), 0.1)',
+          }}
+        >
+          {/* Warm glow at top */}
+          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 400, height: 200, background: 'rgba(var(--p-warm-rgb), 0.15)', filter: 'blur(80px)', pointerEvents: 'none' }} />
+
+          <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: 32 }}>
+              <span className="pill-badge" style={{ background: 'rgba(var(--p-warm-rgb), 0.15)', border: '1px solid rgba(var(--p-warm-rgb), 0.3)', color: 'var(--p-warm)', marginBottom: 16 }}>
+                <Sparkles style={{ width: 14, height: 14 }} />
+                The Formats
+              </span>
             <h2 style={{ fontSize: 32, fontWeight: 700, marginBottom: 12, marginTop: 16 }}>
               5 carousel styles, rotating monthly
             </h2>
@@ -711,7 +775,9 @@ export default function ProposalPage() {
               </p>
             </div>
           </div>
+          </div>
         </section>
+        <main style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px' }}>
 
         {/* ============ 6. THE DASHBOARD ============ */}
         <section className="proposal-section animate-fadeInUp">
