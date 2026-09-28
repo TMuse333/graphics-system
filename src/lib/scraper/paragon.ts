@@ -135,12 +135,6 @@ export async function scrapeParagonListing(url: string): Promise<ScrapeResult> {
 
     // Extract all text data from the page
     const listing = await page.evaluate((sourceUrl: string, collectedImages: ScrapedImage[]) => {
-      // Helper to get text content safely
-      const getText = (selector: string): string | null => {
-        const el = document.querySelector(selector);
-        return el?.textContent?.trim() || null;
-      };
-
       // Helper to parse price
       const parsePrice = (text: string | null): number => {
         if (!text) return 0;
@@ -161,60 +155,219 @@ export async function scrapeParagonListing(url: string): Promise<ScrapeResult> {
       let description: string | null = null;
       let mlsNumber = '';
 
-      // Look for address in common locations
-      const addressEl = document.querySelector('[class*="address"], [class*="street"], h1, h2');
-      if (addressEl) {
-        address = addressEl.textContent?.trim() || '';
-      }
-
-      // Look for price
-      const priceEl = document.querySelector('[class*="price"], [class*="Price"]');
-      if (priceEl) {
-        price = parsePrice(priceEl.textContent);
-      }
-
-      // Look for property details in various formats
+      // Get all text content for regex matching
       const detailsText = document.body.innerText;
 
-      // Try to extract beds
-      const bedsMatch = detailsText.match(/(\d+)\s*(?:bed|bedroom|br)/i);
-      if (bedsMatch) beds = parseInt(bedsMatch[1]);
+      // ========== ADDRESS EXTRACTION ==========
+      // Try multiple Paragon-specific selectors
+      const addressSelectors = [
+        '.listing-address',
+        '.property-address',
+        '[data-testid="address"]',
+        '.address-line',
+        '.street-address',
+        '[class*="AddressLine"]',
+        '[class*="address-line"]',
+        '[class*="streetAddress"]',
+        'h1[class*="address"]',
+        'h2[class*="address"]',
+        // Paragon specific patterns
+        '.listing-detail-address',
+        '.listing-header h1',
+        '.listing-header h2',
+      ];
+
+      for (const selector of addressSelectors) {
+        const el = document.querySelector(selector);
+        if (el?.textContent?.trim()) {
+          address = el.textContent.trim();
+          break;
+        }
+      }
+
+      // Fallback: look for address pattern in text
+      if (!address) {
+        // Match various address patterns including "Lot X-X Street Name" and "123 Street Name"
+        const addrPatterns = [
+          // Lot format: "Lot 24-1 Blue Water Av"
+          /(Lot\s+[\d-]+\s+[A-Za-z][A-Za-z\s]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Court|Ct|Boulevard|Blvd|Way|Place|Pl|Crescent|Cres|Circle|Cir|Av)[^,\n]*)/i,
+          // Standard format: "123 Street Name"
+          /(\d+\s+[A-Za-z][A-Za-z\s]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Court|Ct|Boulevard|Blvd|Way|Place|Pl|Crescent|Cres|Circle|Cir|Av)[^,\n]*)/i,
+          // Paragon format: line after agent name, before city
+          /(?:REALTY|REALTOR)\n([^\n]+)\n\n([A-Za-z\s]+),\s*(?:PE|NS|NB)/i,
+        ];
+        for (const pattern of addrPatterns) {
+          const match = detailsText.match(pattern);
+          if (match) {
+            address = match[1].trim();
+            break;
+          }
+        }
+      }
+
+      // ========== PRICE EXTRACTION ==========
+      const priceSelectors = [
+        '.listing-price',
+        '.property-price',
+        '[data-testid="price"]',
+        '.price',
+        '[class*="Price"]',
+        '[class*="price"]',
+        '.listing-detail-price',
+      ];
+
+      for (const selector of priceSelectors) {
+        const el = document.querySelector(selector);
+        if (el?.textContent) {
+          const p = parsePrice(el.textContent);
+          if (p > 10000) { // Sanity check - real estate prices
+            price = p;
+            break;
+          }
+        }
+      }
+
+      // Fallback: find price pattern in text ($XXX,XXX or CA$XXX,XXX)
+      if (!price) {
+        const pricePatterns = [
+          /CA\$\s*([\d,]+(?:\.\d{2})?)/i,
+          /\$\s*([\d,]+(?:\.\d{2})?)/,
+          /(?:Price|Asking)[:\s]*\$?\s*([\d,]+)/i,
+        ];
+        for (const pattern of pricePatterns) {
+          const match = detailsText.match(pattern);
+          if (match) {
+            const p = parsePrice(match[1]);
+            if (p > 10000) {
+              price = p;
+              break;
+            }
+          }
+        }
+      }
+
+      // ========== BEDS/BATHS/SQFT EXTRACTION ==========
+      // Try to extract beds - multiple patterns
+      const bedsPatterns = [
+        /(\d+)\s*(?:bed|bedroom|br|BD)/i,
+        /(?:bed|bedroom|br|BD)[:\s]*(\d+)/i,
+        /(\d+)\s*(?:Bed|Beds)/,
+      ];
+      for (const pattern of bedsPatterns) {
+        const match = detailsText.match(pattern);
+        if (match) {
+          beds = parseInt(match[1]);
+          break;
+        }
+      }
 
       // Try to extract baths
-      const bathsMatch = detailsText.match(/(\d+(?:\.\d+)?)\s*(?:bath|bathroom|ba)/i);
-      if (bathsMatch) baths = parseFloat(bathsMatch[1]);
+      const bathsPatterns = [
+        /(\d+(?:\.\d+)?)\s*(?:bath|bathroom|ba|BA)/i,
+        /(?:bath|bathroom|ba|BA)[:\s]*(\d+(?:\.\d+)?)/i,
+        /(\d+(?:\.\d+)?)\s*(?:Bath|Baths)/,
+      ];
+      for (const pattern of bathsPatterns) {
+        const match = detailsText.match(pattern);
+        if (match) {
+          baths = parseFloat(match[1]);
+          break;
+        }
+      }
 
       // Try to extract sqft
-      const sqftMatch = detailsText.match(/([\d,]+)\s*(?:sq\.?\s*ft|sqft|square feet)/i);
-      if (sqftMatch) sqft = parseInt(sqftMatch[1].replace(/,/g, ''));
+      const sqftPatterns = [
+        /([\d,]+)\s*(?:sq\.?\s*ft|sqft|square feet|SF)/i,
+        /(?:sq\.?\s*ft|sqft|SF)[:\s]*([\d,]+)/i,
+        /(?:living area|area)[:\s]*([\d,]+)/i,
+      ];
+      for (const pattern of sqftPatterns) {
+        const match = detailsText.match(pattern);
+        if (match) {
+          sqft = parseInt(match[1].replace(/,/g, ''));
+          break;
+        }
+      }
 
-      // Try to extract MLS number
-      const mlsMatch = detailsText.match(/MLS[#:\s]*(\d+)/i);
-      if (mlsMatch) mlsNumber = mlsMatch[1];
+      // ========== MLS NUMBER EXTRACTION ==========
+      const mlsPatterns = [
+        /LISTING\s*ID[#:\s]*\s*(\d+)/i,
+        /Listing\s*ID[#:\s]*\s*(\d+)/i,
+        /MLS[#:\s]*(\d+)/i,
+        /MLS\s*(?:Number|#|No\.?)[:\s]*(\d+)/i,
+        /(?:Property)\s*(?:ID|#)[:\s]*(\d+)/i,
+      ];
+      for (const pattern of mlsPatterns) {
+        const match = detailsText.match(pattern);
+        if (match) {
+          mlsNumber = match[1];
+          break;
+        }
+      }
 
       // If no MLS from text, try to get from image URL
-      // Format: /202623440-uuid.JPG
       if (!mlsNumber && collectedImages.length > 0) {
         const urlMatch = collectedImages[0].url.match(/\/(\d{9,})-[a-f0-9-]+\.[a-zA-Z]+$/i);
         if (urlMatch) mlsNumber = urlMatch[1];
       }
 
-      // Look for description
-      const descEl = document.querySelector('[class*="description"], [class*="remarks"], [class*="details"] p');
-      if (descEl) {
-        description = descEl.textContent?.trim() || null;
+      // ========== DESCRIPTION EXTRACTION ==========
+      const descSelectors = [
+        '.listing-description',
+        '.property-description',
+        '[class*="description"]',
+        '[class*="remarks"]',
+        '.public-remarks',
+        '.listing-remarks',
+      ];
+      for (const selector of descSelectors) {
+        const el = document.querySelector(selector);
+        if (el?.textContent?.trim() && el.textContent.trim().length > 50) {
+          description = el.textContent.trim();
+          break;
+        }
       }
 
-      // Try to find lot size
-      const lotMatch = detailsText.match(/([\d.]+)\s*(?:acres?|ac)/i);
-      if (lotMatch) lotSize = `${lotMatch[1]} acres`;
-
-      // Try to extract city from address or page
-      const cityMatch = address.match(/,\s*([^,]+),?\s*(?:PE|PEI|Prince Edward Island)?$/i);
-      if (cityMatch) {
-        city = cityMatch[1].trim();
-        address = address.replace(/,\s*[^,]+,?\s*(?:PE|PEI|Prince Edward Island)?$/i, '').trim();
+      // ========== LOT SIZE EXTRACTION ==========
+      const lotPatterns = [
+        /([\d.]+)\s*(?:acres?|ac)/i,
+        /lot[:\s]*([\d.]+)\s*(?:acres?|ac|sq\.?\s*ft|sqft)/i,
+      ];
+      for (const pattern of lotPatterns) {
+        const match = detailsText.match(pattern);
+        if (match) {
+          lotSize = `${match[1]} acres`;
+          break;
+        }
       }
+
+      // ========== CITY EXTRACTION ==========
+      // Try to extract city from address or find it in text
+      if (address) {
+        const cityMatch = address.match(/,\s*([A-Za-z\s]+),?\s*(?:PE|PEI|NS|NB|Prince Edward Island|Nova Scotia|New Brunswick)?$/i);
+        if (cityMatch) {
+          city = cityMatch[1].trim();
+          address = address.replace(/,\s*[A-Za-z\s]+,?\s*(?:PE|PEI|NS|NB|Prince Edward Island|Nova Scotia|New Brunswick)?$/i, '').trim();
+        }
+      }
+
+      // Fallback: look for city pattern in text (City, PE postal)
+      if (!city) {
+        const cityPatterns = [
+          /\n([A-Za-z\s]+),\s*(?:PE|PEI)\s+[A-Z]\d[A-Z]\s*\d[A-Z]\d/i,
+          /([A-Za-z\s]+),\s*(?:PE|PEI|NS|NB)\s+[A-Z]\d[A-Z]/i,
+        ];
+        for (const pattern of cityPatterns) {
+          const match = detailsText.match(pattern);
+          if (match) {
+            city = match[1].trim();
+            break;
+          }
+        }
+      }
+
+      // Debug: capture some raw text for troubleshooting
+      const debugSnippet = detailsText.substring(0, 500);
 
       return {
         mlsNumber,
@@ -231,6 +384,7 @@ export async function scrapeParagonListing(url: string): Promise<ScrapeResult> {
         images: collectedImages,
         scrapedAt: new Date().toISOString(),
         sourceUrl,
+        _debug: debugSnippet, // Will be stripped before returning to client
       };
     }, url, downloadedImages);
 

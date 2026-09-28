@@ -6,7 +6,10 @@
       "Bash(npm install:*)",
       "Bash(curl:*)",
       "Bash(stripe prices create:*)",
-      "Bash(git diff:*)"
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)"
     ]
   }
 }

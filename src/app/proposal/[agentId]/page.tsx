@@ -132,6 +132,7 @@ export default function ProposalPage() {
   const [carouselFrames, setCarouselFrames] = useState<Record<string, number>>({});
   const [expandedCarousel, setExpandedCarousel] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   // Hardcoded stats (no API dependency for now)
   const liveStats = {
     headline: {
@@ -164,7 +165,22 @@ export default function ProposalPage() {
     document.fonts.ready.then(() => setFontsReady(true));
   }, [agentId]);
 
+  // Track scroll progress for floating CTA
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = Math.min(scrollTop / docHeight, 1);
+      setScrollProgress(progress);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   if (!agent) return null;
+
+  const showFloatingCta = scrollProgress > 0.1;
+  const ctaPulse = scrollProgress > 0.4;
 
   return (
     <div className="proposal-page">
@@ -1513,6 +1529,30 @@ export default function ProposalPage() {
         </section>
 
       </main>
+
+      {/* Floating CTA - appears and pulses as user scrolls */}
+      <a
+        href={proposal.stripeFullPackageUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`sticky-cta ${showFloatingCta ? 'visible' : ''} ${ctaPulse ? 'pulse' : ''}`}
+        style={{
+          fontSize: 14,
+          fontWeight: 600,
+          color: '#fff',
+          background: 'linear-gradient(135deg, var(--p-accent), #059669)',
+          padding: '14px 24px',
+          borderRadius: 50,
+          textDecoration: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          boxShadow: '0 4px 20px rgba(16, 185, 129, 0.4)',
+        }}
+      >
+        Get Started
+        <ArrowRight style={{ width: 16, height: 16 }} />
+      </a>
     </div>
   );
 }
