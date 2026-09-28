@@ -751,11 +751,17 @@ a {
 /* Responsive */
 @media (max-width: 768px) {
   .proposal-section {
-    padding: 40px 0;
+    padding: 32px 0;
   }
 
   .glass-card {
     border-radius: 12px;
+    margin-bottom: 12px;
+  }
+
+  /* Add spacing to grid items on mobile */
+  .proposal-page .grid > .glass-card {
+    margin-bottom: 0;
   }
 
   /* Force horizontal layouts to stack vertically on mobile */
@@ -782,6 +788,11 @@ a {
   /* Stack any flex row on mobile */
   .proposal-page [style*="display: flex"][style*="gap"]:not([style*="flex-direction: column"]):not(.mobile-nav):not(.desktop-nav) {
     flex-wrap: wrap !important;
+  }
+
+  /* Increase gap on mobile grids */
+  .proposal-page .grid {
+    gap: 16px !important;
   }
 }
 

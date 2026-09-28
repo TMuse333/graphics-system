@@ -197,20 +197,9 @@ export default function ProposalPage() {
 
       {/* ============ HEADER ============ */}
       <header
-        className="glass-card animate-fadeIn"
-        style={{
-          position: 'sticky',
-          top: 16,
-          margin: '16px 24px',
-          padding: '12px 24px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          zIndex: 100,
-          borderRadius: 12,
-        }}
+        className="glass-card animate-fadeIn fixed top-4 left-4 right-4 z-50 flex justify-between items-center px-4 md:px-6 py-3 rounded-xl"
       >
-        <span className="gradient-text" style={{ fontSize: 16, fontWeight: 700, letterSpacing: 1 }}>
+        <span className="gradient-text text-xs md:text-base font-bold tracking-wide">
           LISTING GRAPHICS
         </span>
 
@@ -379,7 +368,7 @@ export default function ProposalPage() {
         }
       `}</style>
 
-      <main style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px' }}>
+      <main style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px', paddingTop: 80 }}>
 
         {/* ============ 1. VIDEO INTRO ============ */}
         <section className="proposal-section animate-fadeInUp" style={{ textAlign: 'center', paddingTop: 40 }}>
@@ -588,7 +577,7 @@ export default function ProposalPage() {
             </p>
 
             {/* Question cards grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
               {proposal.clientQuestions.map((q, i) => (
                 <div
                   key={i}
@@ -625,7 +614,7 @@ export default function ProposalPage() {
           </div>
 
           {/* Horizontal flow - Input steps */}
-          <div className="animate-fadeInUp animation-delay-500" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 32, flexWrap: 'wrap' }}>
+          <div className="animate-fadeInUp animation-delay-500 flex flex-wrap items-center justify-center gap-3 mb-8">
             <FlowStep icon={<Calendar style={{ width: 18, height: 18 }} />} label="Consistent Posting" sublabel="Tue + Thu" color="var(--p-primary)" />
             <div className="flow-connector" />
             <FlowStep icon={<TrendingUp style={{ width: 18, height: 18 }} />} label="Algorithm Rewards" sublabel="More reach" color="var(--p-secondary)" />
@@ -636,7 +625,7 @@ export default function ProposalPage() {
           </div>
 
           {/* Outcome cards */}
-          <div className="animate-fadeInUp animation-delay-500" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 32 }}>
+          <div className="animate-fadeInUp animation-delay-500 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             <div className="glass-card" style={{ padding: 24, textAlign: 'center' }}>
               <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(var(--p-accent-rgb), 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
                 <Target style={{ width: 24, height: 24, color: 'var(--p-accent)' }} />
@@ -691,8 +680,8 @@ export default function ProposalPage() {
             className="glass-card"
             style={{ padding: 40 }}
           >
-            <div style={{ display: 'flex', gap: 40, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-              <div style={{ flex: 1, minWidth: 300 }}>
+            <div className="flex flex-col lg:flex-row gap-10 items-start">
+              <div className="flex-1 min-w-0">
                 <span className="pill-badge" style={{ background: 'rgba(var(--p-secondary-rgb), 0.15)', border: '1px solid rgba(var(--p-secondary-rgb), 0.3)', color: 'var(--p-secondary)', marginBottom: 16 }}>
                   <MessageCircle style={{ width: 14, height: 14 }} />
                   Your Voice
@@ -726,12 +715,7 @@ export default function ProposalPage() {
               </div>
 
               <div
-                className="glass-card"
-                style={{
-                  width: 280,
-                  padding: 20,
-                  flexShrink: 0,
-                }}
+                className="glass-card w-full lg:w-[280px] lg:flex-shrink-0 p-5"
               >
                 <p style={{ fontSize: 11, color: 'var(--text-50)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
                   Sample Question
@@ -881,7 +865,7 @@ export default function ProposalPage() {
           </div>
 
           {/* Sample Carousels - showing variety */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 24 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             {CAROUSEL_SHOWCASE.slice(0, 3).map((item) => (
               <CarouselPreviewNew
                 key={item.id}
@@ -894,7 +878,7 @@ export default function ProposalPage() {
               />
             ))}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24, maxWidth: 600, margin: '0 auto' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[600px] mx-auto">
             {CAROUSEL_SHOWCASE.slice(3, 5).map((item) => (
               <CarouselPreviewNew
                 key={item.id}
@@ -911,7 +895,7 @@ export default function ProposalPage() {
           {/* Rotation breakdown */}
           <div className="glass-card" style={{ marginTop: 32, padding: 24 }}>
             <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: 'var(--text-90)' }}>Monthly Rotation ({proposal.carouselsCount} posts):</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p style={{ fontSize: 12, color: 'var(--text-50)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Tuesdays (Education)</p>
                 <p style={{ fontSize: 13, color: 'var(--text-70)' }}>Buyer Objections, Client Questions, Myth vs Fact, Process Guides</p>
@@ -974,7 +958,7 @@ export default function ProposalPage() {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 32 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
             <div className="glass-card" style={{ padding: 28, textAlign: 'center' }}>
               <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(var(--p-primary-rgb), 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                 <Calendar style={{ width: 26, height: 26, color: 'var(--p-primary)' }} />
@@ -1037,7 +1021,7 @@ export default function ProposalPage() {
           ) : liveStats ? (
             <>
               {/* Main stats grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div className="glass-card" style={{ padding: 24, textAlign: 'center' }}>
                   <p style={{ fontSize: 32, fontWeight: 700, color: 'var(--p-primary)', marginBottom: 4 }}>
                     {liveStats.headline?.totalReachFormatted || '—'}
@@ -1065,7 +1049,7 @@ export default function ProposalPage() {
               </div>
 
               {/* Top performer + Recent activity */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Top Performer */}
                 {liveStats.topPosts?.byReach?.[0] && (
                   <div className="glass-card" style={{ padding: 24 }}>
@@ -1154,7 +1138,7 @@ export default function ProposalPage() {
           </div>
 
           {/* Hero row: Full Package + Calendar */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, maxWidth: 1000, margin: '0 auto 32px' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[1000px] mx-auto mb-8">
             {/* Full Package - Hero Card */}
             <div
               className="glass-card glow-accent"
@@ -1313,7 +1297,7 @@ export default function ProposalPage() {
               </div>
 
               {/* Stats row */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
+              <div className="grid grid-cols-3 gap-3 mb-5">
                 {[{ value: '8', label: 'Carousels' }, { value: '32-48', label: 'Frames' }, { value: '2×', label: 'Per Week' }].map((stat, i) => (
                   <div key={i} className="stat-box">
                     <p className="stat-box-value" style={{ color: 'var(--p-primary)' }}>{stat.value}</p>
@@ -1323,7 +1307,7 @@ export default function ProposalPage() {
               </div>
 
               {/* Benefits */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div className="grid grid-cols-2 gap-2">
                 {[
                   { icon: Calendar, label: 'I schedule it' },
                   { icon: Sparkles, label: 'I create it' },
@@ -1340,7 +1324,7 @@ export default function ProposalPage() {
           </div>
 
           {/* Individual options */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, maxWidth: 700, margin: '0 auto 40px' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[700px] mx-auto mb-10">
             {/* Answer Carousels */}
             <div
               className="glass-card"
