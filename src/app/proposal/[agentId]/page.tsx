@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Play, Calendar, MessageCircle, TrendingUp, BarChart3, CheckCircle2, ChevronLeft, ChevronRight, X, Maximize2, Lightbulb, Sparkles, ArrowRight, Users, Eye, Heart, Target, Zap, AlertCircle, ArrowDown } from 'lucide-react';
+import { Play, Calendar, MessageCircle, TrendingUp, BarChart3, CheckCircle2, ChevronLeft, ChevronRight, X, Maximize2, Lightbulb, Sparkles, ArrowRight, Users, Eye, Heart, Target, Zap, AlertCircle, ArrowDown, Menu } from 'lucide-react';
 import { getAgent } from '@/lib/store';
 import { greg } from '@/lib/theme';
 import type { Agent } from '@/lib/types';
@@ -131,6 +131,7 @@ export default function ProposalPage() {
   const [fontsReady, setFontsReady] = useState(false);
   const [carouselFrames, setCarouselFrames] = useState<Record<string, number>>({});
   const [expandedCarousel, setExpandedCarousel] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   // Hardcoded stats (no API dependency for now)
   const liveStats = {
     headline: {
@@ -197,8 +198,8 @@ export default function ProposalPage() {
           LISTING GRAPHICS
         </span>
 
-        {/* Navigation */}
-        <nav style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+        {/* Desktop Navigation */}
+        <nav className="desktop-nav" style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
           <a
             href="#addition"
             style={{ fontSize: 13, color: 'var(--text-60)', textDecoration: 'none', transition: 'color 0.2s' }}
@@ -224,7 +225,9 @@ export default function ProposalPage() {
             Dashboard
           </a>
           <a
-            href="#pricing"
+            href={proposal.stripeFullPackageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               fontSize: 13,
               fontWeight: 600,
@@ -252,7 +255,113 @@ export default function ProposalPage() {
             <ArrowRight style={{ width: 14, height: 14 }} />
           </a>
         </nav>
+
+        {/* Mobile Navigation */}
+        <div className="mobile-nav" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <a
+            href={proposal.stripeFullPackageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: '#fff',
+              background: 'linear-gradient(135deg, var(--p-accent), #059669)',
+              padding: '8px 16px',
+              borderRadius: 8,
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
+            }}
+          >
+            Get Started
+            <ArrowRight style={{ width: 14, height: 14 }} />
+          </a>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              border: 'none',
+              borderRadius: 8,
+              padding: 8,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {mobileMenuOpen ? (
+              <X style={{ width: 20, height: 20, color: 'var(--text-80)' }} />
+            ) : (
+              <Menu style={{ width: 20, height: 20, color: 'var(--text-80)' }} />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Dropdown */}
+        {mobileMenuOpen && (
+          <div
+            className="mobile-dropdown"
+            style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              marginTop: 8,
+              background: 'rgba(15, 23, 42, 0.98)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 12,
+              padding: 16,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+            }}
+          >
+            <a
+              href="#addition"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ fontSize: 14, color: 'var(--text-70)', textDecoration: 'none', padding: '8px 0' }}
+            >
+              The Upgrade
+            </a>
+            <a
+              href="#formats"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ fontSize: 14, color: 'var(--text-70)', textDecoration: 'none', padding: '8px 0' }}
+            >
+              Formats
+            </a>
+            <a
+              href="#dashboard"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ fontSize: 14, color: 'var(--text-70)', textDecoration: 'none', padding: '8px 0' }}
+            >
+              Dashboard
+            </a>
+            <a
+              href="#pricing"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ fontSize: 14, color: 'var(--text-70)', textDecoration: 'none', padding: '8px 0' }}
+            >
+              Pricing
+            </a>
+          </div>
+        )}
       </header>
+
+      {/* Mobile/Desktop Nav Styles */}
+      <style jsx>{`
+        .desktop-nav { display: flex; }
+        .mobile-nav { display: none; }
+
+        @media (max-width: 768px) {
+          .desktop-nav { display: none !important; }
+          .mobile-nav { display: flex !important; }
+        }
+      `}</style>
 
       <main style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px' }}>
 
