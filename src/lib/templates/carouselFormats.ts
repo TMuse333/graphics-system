@@ -69,6 +69,15 @@ export interface ThisOrThatContent {
   cta: string;
 }
 
+export interface FormatQuestion {
+  id: string;
+  type: 'text' | 'textarea' | 'select' | 'multi-select';
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+  options?: string[];
+}
+
 export interface CarouselFormat {
   id: string;
   kind: 'carousel';
@@ -80,28 +89,82 @@ export interface CarouselFormat {
   tones: Tone[]; // per frame
   sampleTopics: string[];
   ported: boolean;
+  // Questions for agent to ask client
+  questions?: FormatQuestion[];
 }
 
 export const CAROUSEL_FORMATS: CarouselFormat[] = [
-  { id: 'MarketPulseCarousel', kind: 'carousel', size: '1080x1350', frames: 5, day: 'wed', audience: 'both',
+  {
+    id: 'MarketPulseCarousel', kind: 'carousel', size: '1080x1350', frames: 5, day: 'wed', audience: 'both',
     imageSlots: ['landscape', 'chart'], tones: ['dark', 'light', 'dark', 'light', 'dark'],
-    sampleTopics: ['PEI Q3 market snapshot', 'Queens County inventory update'], ported: true },
-  { id: 'NeighbourhoodGuideCarousel', kind: 'carousel', size: '1080x1350', frames: 7, day: 'wed', audience: 'buyers',
+    sampleTopics: ['PEI Q3 market snapshot', 'Queens County inventory update'], ported: true,
+    questions: [
+      { id: 'areas', type: 'multi-select', label: 'Which areas should we cover?', options: ['Charlottetown', 'Stratford', 'Cornwall', 'Summerside', 'North Shore', 'South Shore', 'Western PEI'] },
+      { id: 'metrics', type: 'multi-select', label: 'What metrics matter most to your audience?', options: ['Average price', 'Days on market', 'Inventory levels', 'Price trends', 'Sales volume', 'New listings'] },
+      { id: 'timeframe', type: 'select', label: 'What timeframe?', options: ['This month', 'This quarter', 'Year over year'] },
+      { id: 'insights', type: 'textarea', label: 'Any specific insights or commentary you want to include?', placeholder: 'e.g., "Inventory is tight in Stratford right now..."' }
+    ]
+  },
+  {
+    id: 'NeighbourhoodGuideCarousel', kind: 'carousel', size: '1080x1350', frames: 7, day: 'wed', audience: 'buyers',
     imageSlots: ['community', 'map'], tones: ['dark', 'light', 'light', 'dark', 'light', 'dark', 'dark'],
-    sampleTopics: ['Living in Stratford', 'Living in Cornwall', 'Living in North Rustico'], ported: true },
-  { id: 'ProcessTimelineCarousel', kind: 'carousel', size: '1080x1350', frames: 10, day: 'tue', audience: 'buyers',
+    sampleTopics: ['Living in Stratford', 'Living in Cornwall', 'Living in North Rustico'], ported: true,
+    questions: [
+      { id: 'neighbourhood', type: 'text', label: 'Which neighbourhood or area?', placeholder: 'e.g., Stratford, Cornwall, North Rustico', required: true },
+      { id: 'highlights', type: 'multi-select', label: 'What makes this area special?', options: ['Schools', 'Beaches', 'Restaurants', 'Shopping', 'Parks', 'Golf courses', 'Healthcare', 'Commute to Charlottetown'] },
+      { id: 'priceRange', type: 'text', label: 'Typical price range?', placeholder: 'e.g., $350K - $550K' },
+      { id: 'bestFor', type: 'textarea', label: 'Who is this area best for?', placeholder: 'e.g., "Young families looking for newer builds with good schools nearby"' }
+    ]
+  },
+  {
+    id: 'ProcessTimelineCarousel', kind: 'carousel', size: '1080x1350', frames: 10, day: 'tue', audience: 'buyers',
     imageSlots: ['landscape'], tones: ['dark', 'dark', 'dark', 'light', 'dark', 'light', 'dark', 'light', 'dark', 'dark'],
-    sampleTopics: ['Buying in PEI: offer to keys', 'Selling in PEI: list to close'], ported: true },
-  { id: 'MythVsFactCarousel', kind: 'carousel', size: '1080x1350', frames: 6, day: 'tue', audience: 'sellers',
+    sampleTopics: ['Buying in PEI: offer to keys', 'Selling in PEI: list to close'], ported: true,
+    questions: [
+      { id: 'process', type: 'select', label: 'Which process are we explaining?', options: ['Buying a home', 'Selling a home', 'First-time buyer journey', 'Investment property purchase'], required: true },
+      { id: 'commonQuestions', type: 'textarea', label: 'What questions do clients usually ask about this process?', placeholder: 'e.g., "How long does financing take?" "When do I get the keys?"' },
+      { id: 'localTips', type: 'textarea', label: 'Any PEI-specific tips or timeline info?', placeholder: 'e.g., "Title searches in PEI typically take..."' }
+    ]
+  },
+  {
+    id: 'MythVsFactCarousel', kind: 'carousel', size: '1080x1350', frames: 6, day: 'tue', audience: 'sellers',
     imageSlots: ['property'], tones: ['red', 'light', 'light', 'light', 'light', 'dark'],
-    sampleTopics: ['5 seller myths', 'Pricing myths'], ported: true },
-  { id: 'ClientQuestionsCarousel', kind: 'carousel', size: '1080x1350', frames: 5, day: 'tue', audience: 'both',
+    sampleTopics: ['5 seller myths', 'Pricing myths'], ported: true,
+    questions: [
+      { id: 'audience', type: 'select', label: 'Who is this for?', options: ['Sellers', 'Buyers', 'First-time buyers', 'Investors'], required: true },
+      { id: 'myths', type: 'textarea', label: 'What myths or misconceptions do you hear most often?', placeholder: 'e.g., "You need 20% down", "Spring is the only time to sell"', required: true },
+      { id: 'facts', type: 'textarea', label: 'What are the actual facts you want to share?', placeholder: 'The truth behind each myth...' }
+    ]
+  },
+  {
+    id: 'ClientQuestionsCarousel', kind: 'carousel', size: '1080x1350', frames: 5, day: 'tue', audience: 'both',
     imageSlots: ['headshot', 'property'], tones: ['light', 'dark', 'light', 'dark', 'dark'],
-    sampleTopics: ['Questions I got this month', 'Non-resident buyer questions'], ported: true },
-  { id: 'ThisOrThatCarousel', kind: 'carousel', size: '1080x1350', frames: 7, day: 'wed', audience: 'buyers',
+    sampleTopics: ['Questions I got this month', 'Non-resident buyer questions'], ported: true,
+    questions: [
+      { id: 'theme', type: 'text', label: 'Theme or title for this Q&A?', placeholder: 'e.g., "Questions I Got This Month", "First-Time Buyer FAQs"' },
+      { id: 'questions', type: 'textarea', label: 'What questions do you want to answer? (one per line)', placeholder: 'What\'s a conditional offer?\nHow much deposit do I need?\nShould I get an inspection?', required: true },
+      { id: 'answers', type: 'textarea', label: 'Your answers to each question (one per line, matching order above)', placeholder: 'A conditional offer means...\nTypically 5% of purchase price...\nYes, always recommend...' }
+    ]
+  },
+  {
+    id: 'ThisOrThatCarousel', kind: 'carousel', size: '1080x1350', frames: 7, day: 'wed', audience: 'buyers',
     imageSlots: ['property', 'community'], tones: ['dark', 'light', 'dark', 'light', 'dark', 'light', 'dark'],
-    sampleTopics: ['Cottage vs year-round home', 'Charlottetown condo vs Stratford house', 'Build vs buy'], ported: true },
-  { id: 'BuyerObjectionsCarousel', kind: 'carousel', size: '1080x1350', frames: 7, day: 'tue', audience: 'buyers',
+    sampleTopics: ['Cottage vs year-round home', 'Charlottetown condo vs Stratford house', 'Build vs buy'], ported: true,
+    questions: [
+      { id: 'optionA', type: 'text', label: 'Option A', placeholder: 'e.g., Cottage', required: true },
+      { id: 'optionB', type: 'text', label: 'Option B', placeholder: 'e.g., Year-round home', required: true },
+      { id: 'comparisons', type: 'textarea', label: 'What factors should we compare? (one per line)', placeholder: 'Price range\nMaintenance\nRental potential\nLifestyle fit' },
+      { id: 'verdict', type: 'textarea', label: 'Your take - who should choose which?', placeholder: 'e.g., "Cottage if you want a getaway, year-round if you\'re relocating"' }
+    ]
+  },
+  {
+    id: 'BuyerObjectionsCarousel', kind: 'carousel', size: '1080x1350', frames: 7, day: 'tue', audience: 'buyers',
     imageSlots: ['headshot', 'landscape'], tones: ['light', 'light', 'dark', 'light', 'dark', 'light', 'dark'],
-    sampleTopics: ['5 common buyer objections', 'First-time buyer concerns'], ported: true },
+    sampleTopics: ['5 common buyer objections', 'First-time buyer concerns'], ported: true,
+    questions: [
+      { id: 'topic', type: 'text', label: 'What topic or objection type?', placeholder: 'e.g., "Conditional Offers", "Financing Concerns"', required: true },
+      { id: 'objections', type: 'textarea', label: 'What objections or concerns do buyers have? (one per line)', placeholder: 'What if my financing falls through?\nWhat if the inspection finds problems?\nDo conditions hurt my offer?', required: true },
+      { id: 'responses', type: 'textarea', label: 'How do you respond to each? (one per line, matching order above)', placeholder: 'A financing condition protects you...\nAn inspection condition lets you...\nIn a hot market, fewer conditions means...' }
+    ]
+  },
 ];
