@@ -234,6 +234,7 @@ export default function TemplatesPage() {
                       {selectedCarouselData.sampleData && (
                         <selectedCarouselData.component
                           agent={greg}
+                          content={selectedCarouselData.sampleData}
                           carousel={selectedCarouselData.sampleData}
                           frameIndex={previewFrame}
                         />
