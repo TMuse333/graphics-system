@@ -30,6 +30,14 @@ import ComingSoon from './ComingSoon';
 import ProcessExplainer from './ProcessExplainer';
 import BuyerObjectionsCarousel from './BuyerObjectionsCarousel';
 
+// Carousel imports
+import MarketPulseCarousel, { SAMPLE_MARKET_PULSE } from './MarketPulseCarousel';
+import NeighbourhoodGuideCarousel, { SAMPLE_NEIGHBOURHOOD_GUIDE } from './NeighbourhoodGuideCarousel';
+import ProcessTimelineCarousel, { SAMPLE_PROCESS_TIMELINE } from './ProcessTimelineCarousel';
+import MythVsFactCarousel, { SAMPLE_MYTH_VS_FACT } from './MythVsFactCarousel';
+import ClientQuestionsCarousel, { SAMPLE_CLIENT_QUESTIONS } from './ClientQuestionsCarousel';
+import ThisOrThatCarousel, { SAMPLE_THIS_OR_THAT } from './ThisOrThatCarousel';
+
 // ============ REGISTRY TYPES ============
 
 export type TemplateFieldType = 'date' | 'time' | 'badge' | 'blurb' | 'features' | 'location';
@@ -303,19 +311,190 @@ const PRINT_REGISTRY: Record<string, TemplateRegistryEntry> = {
 // ============ CAROUSEL REGISTRY ============
 // Carousels are multi-frame content - separate from single-image templates
 
+const SAMPLE_BUYER_OBJECTIONS = {
+  kicker: 'Buyer Guide',
+  title: ['Conditional', 'Offers'] as [string, string],
+  subtitle: 'What they are and **when to use them.**',
+  items: [
+    { label: 'Financing', objection: 'Can I back out if my mortgage falls through?', response: 'A financing condition gives you 5-10 days to secure final approval. No approval, no penalty.', icon: 'tag' as const },
+    { label: 'Inspection', objection: 'What if the inspection finds problems?', response: 'An inspection condition lets you renegotiate or walk away if major issues surface.', icon: 'wrench' as const },
+    { label: 'Sale of Home', objection: 'I need to sell my current home first.', response: 'A sale condition protects you, but makes your offer less competitive. We\'ll discuss timing strategy.', icon: 'clock' as const },
+    { label: 'Competing', objection: 'Do conditions hurt my offer?', response: 'In a hot market, fewer conditions = stronger offer. We balance protection with competitiveness.', icon: 'users' as const },
+  ],
+  closing: { kicker: 'Questions?', title: 'Let\'s talk strategy', body: 'Every situation is different.', cta: 'Call me', icon: 'handshake' as const },
+  portraitUrl: '/agents/greg/headshot.png',
+};
+
 export const CAROUSEL_REGISTRY: Record<string, CarouselRegistryEntry> = {
   'buyer-objections': {
     type: 'buyer-objections',
-    name: 'Buyer Objections',
+    name: 'Buyer Guide',
     kind: 'carousel',
     category: 'content',
     frameSize: PORTRAIT,
-    frameCount: 'variable', // cover + N slides + closing
+    frameCount: 'variable',
     component: BuyerObjectionsCarousel,
     contentFields: ['kicker', 'title'],
     frameFields: ['number', 'icon', 'title', 'body'],
     alternatingGrounds: true,
-    blurb: 'Swipeable carousel addressing common buyer concerns. 7 frames: cover, 5 objections, closing.',
+    blurb: 'Address common buyer concerns and objections with clear answers.',
+    icon: 'HelpCircle',
+    color: '#3b82f6',
+    day: 'tue',
+    audience: 'buyers',
+    sampleData: SAMPLE_BUYER_OBJECTIONS,
+    questions: [
+      { id: 'topic', type: 'text', label: 'What topic or objection type?', placeholder: 'e.g., "Conditional Offers", "Financing Concerns"', required: true },
+      { id: 'objections', type: 'textarea', label: 'What objections or concerns do buyers have? (one per line)', placeholder: 'What if my financing falls through?\nWhat if the inspection finds problems?', required: true },
+      { id: 'responses', type: 'textarea', label: 'How do you respond to each? (one per line)', placeholder: 'A financing condition protects you...\nAn inspection condition lets you...' },
+    ],
+  },
+
+  'market-pulse': {
+    type: 'market-pulse',
+    name: 'Market Stats',
+    kind: 'carousel',
+    category: 'content',
+    frameSize: PORTRAIT,
+    frameCount: 5,
+    component: MarketPulseCarousel,
+    contentFields: ['kicker', 'title', 'stats'],
+    frameFields: ['title', 'body'],
+    alternatingGrounds: true,
+    blurb: 'Local market updates - average prices, days on market, trends.',
+    icon: 'TrendingUp',
+    color: '#10b981',
+    day: 'thu',
+    audience: 'both',
+    sampleData: SAMPLE_MARKET_PULSE,
+    questions: [
+      { id: 'areas', type: 'multi-select', label: 'Which areas should we cover?', options: ['Charlottetown', 'Stratford', 'Cornwall', 'Summerside', 'North Shore', 'South Shore', 'Western PEI'] },
+      { id: 'metrics', type: 'multi-select', label: 'What metrics matter most?', options: ['Average price', 'Days on market', 'Inventory levels', 'Price trends', 'Sales volume', 'New listings'] },
+      { id: 'timeframe', type: 'select', label: 'What timeframe?', options: ['This month', 'This quarter', 'Year over year'] },
+      { id: 'insights', type: 'textarea', label: 'Any specific insights or commentary?', placeholder: 'e.g., "Inventory is tight in Stratford right now..."' },
+    ],
+  },
+
+  'neighbourhood-guide': {
+    type: 'neighbourhood-guide',
+    name: 'Neighbourhood Guide',
+    kind: 'carousel',
+    category: 'content',
+    frameSize: PORTRAIT,
+    frameCount: 7,
+    component: NeighbourhoodGuideCarousel,
+    contentFields: ['kicker', 'title'],
+    frameFields: ['title', 'body'],
+    alternatingGrounds: true,
+    blurb: 'Spotlight local areas - what makes them special, price ranges, lifestyle.',
+    icon: 'Map',
+    color: '#f59e0b',
+    day: 'wed',
+    audience: 'buyers',
+    sampleData: SAMPLE_NEIGHBOURHOOD_GUIDE,
+    questions: [
+      { id: 'neighbourhood', type: 'text', label: 'Which neighbourhood or area?', placeholder: 'e.g., Stratford, Cornwall, North Rustico', required: true },
+      { id: 'highlights', type: 'multi-select', label: 'What makes this area special?', options: ['Schools', 'Beaches', 'Restaurants', 'Shopping', 'Parks', 'Golf courses', 'Healthcare', 'Commute to Charlottetown'] },
+      { id: 'priceRange', type: 'text', label: 'Typical price range?', placeholder: 'e.g., $350K - $550K' },
+      { id: 'bestFor', type: 'textarea', label: 'Who is this area best for?', placeholder: 'e.g., "Young families looking for newer builds..."' },
+    ],
+  },
+
+  'process-timeline': {
+    type: 'process-timeline',
+    name: 'Process Timeline',
+    kind: 'carousel',
+    category: 'content',
+    frameSize: PORTRAIT,
+    frameCount: 10,
+    component: ProcessTimelineCarousel,
+    contentFields: ['kicker', 'title'],
+    frameFields: ['number', 'title', 'body'],
+    alternatingGrounds: true,
+    blurb: 'Walk through the buying or selling process step by step.',
+    icon: 'Clock',
+    color: '#6366f1',
+    day: 'tue',
+    audience: 'buyers',
+    sampleData: SAMPLE_PROCESS_TIMELINE,
+    questions: [
+      { id: 'process', type: 'select', label: 'Which process are we explaining?', options: ['Buying a home', 'Selling a home', 'First-time buyer journey', 'Investment property purchase'], required: true },
+      { id: 'commonQuestions', type: 'textarea', label: 'What questions do clients usually ask about this process?', placeholder: 'e.g., "How long does financing take?"' },
+      { id: 'localTips', type: 'textarea', label: 'Any PEI-specific tips or timeline info?', placeholder: 'e.g., "Title searches in PEI typically take..."' },
+    ],
+  },
+
+  'myth-vs-fact': {
+    type: 'myth-vs-fact',
+    name: 'Myth vs Fact',
+    kind: 'carousel',
+    category: 'content',
+    frameSize: PORTRAIT,
+    frameCount: 6,
+    component: MythVsFactCarousel,
+    contentFields: ['kicker', 'title'],
+    frameFields: ['title', 'body'],
+    alternatingGrounds: true,
+    blurb: 'Bust common misconceptions with facts.',
+    icon: 'Scale',
+    color: '#ef4444',
+    day: 'tue',
+    audience: 'sellers',
+    sampleData: SAMPLE_MYTH_VS_FACT,
+    questions: [
+      { id: 'audience', type: 'select', label: 'Who is this for?', options: ['Sellers', 'Buyers', 'First-time buyers', 'Investors'], required: true },
+      { id: 'myths', type: 'textarea', label: 'What myths do you hear most often?', placeholder: 'e.g., "You need 20% down"\n"Spring is the only time to sell"', required: true },
+      { id: 'facts', type: 'textarea', label: 'What are the actual facts?', placeholder: 'The truth behind each myth...' },
+    ],
+  },
+
+  'client-questions': {
+    type: 'client-questions',
+    name: 'Client Q&A',
+    kind: 'carousel',
+    category: 'content',
+    frameSize: PORTRAIT,
+    frameCount: 5,
+    component: ClientQuestionsCarousel,
+    contentFields: ['kicker', 'title'],
+    frameFields: ['title', 'body'],
+    alternatingGrounds: true,
+    blurb: 'Answer real questions from your clients.',
+    icon: 'MessageCircle',
+    color: '#8b5cf6',
+    day: 'tue',
+    audience: 'both',
+    sampleData: SAMPLE_CLIENT_QUESTIONS,
+    questions: [
+      { id: 'theme', type: 'text', label: 'Theme or title for this Q&A?', placeholder: 'e.g., "Questions I Got This Month"' },
+      { id: 'questions', type: 'textarea', label: 'What questions do you want to answer? (one per line)', placeholder: 'What\'s a conditional offer?\nHow much deposit do I need?', required: true },
+      { id: 'answers', type: 'textarea', label: 'Your answers (one per line, matching order)', placeholder: 'A conditional offer means...\nTypically 5% of purchase price...' },
+    ],
+  },
+
+  'this-or-that': {
+    type: 'this-or-that',
+    name: 'This or That',
+    kind: 'carousel',
+    category: 'content',
+    frameSize: PORTRAIT,
+    frameCount: 7,
+    component: ThisOrThatCarousel,
+    contentFields: ['kicker', 'title'],
+    frameFields: ['title', 'body'],
+    alternatingGrounds: true,
+    blurb: 'Compare options - Condo vs House, Rural vs Urban, Build vs Buy.',
+    icon: 'GitCompare',
+    color: '#f59e0b',
+    day: 'wed',
+    audience: 'buyers',
+    sampleData: SAMPLE_THIS_OR_THAT,
+    questions: [
+      { id: 'optionA', type: 'text', label: 'Option A', placeholder: 'e.g., Cottage', required: true },
+      { id: 'optionB', type: 'text', label: 'Option B', placeholder: 'e.g., Year-round home', required: true },
+      { id: 'comparisons', type: 'textarea', label: 'What factors should we compare? (one per line)', placeholder: 'Price range\nMaintenance\nRental potential' },
+      { id: 'verdict', type: 'textarea', label: 'Your take - who should choose which?', placeholder: 'e.g., "Cottage if you want a getaway..."' },
+    ],
   },
 };
 

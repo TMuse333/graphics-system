@@ -80,6 +80,19 @@ export type RecurringConfig = {
  */
 export type LayoutPattern = 'sandwich' | 'overlay' | 'split' | 'card' | 'full';
 
+// ============ WIZARD QUESTIONS ============
+
+export type QuestionType = 'text' | 'textarea' | 'select' | 'multi-select';
+
+export type WizardQuestion = {
+  id: string;
+  type: QuestionType;
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+  options?: string[];
+};
+
 // ============ EXTENDED REGISTRY ENTRY ============
 
 export type CarouselRegistryEntry = {
@@ -104,6 +117,21 @@ export type CarouselRegistryEntry = {
   recurring?: RecurringConfig;
 
   blurb?: string;
+
+  // === NEW: Wizard support ===
+  /** Questions the wizard asks the user */
+  questions?: WizardQuestion[];
+  /** Sample data for preview */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sampleData?: any;
+  /** Icon name (Lucide) for UI */
+  icon?: string;
+  /** Accent color for UI */
+  color?: string;
+  /** Which day this typically posts */
+  day?: 'tue' | 'wed' | 'thu';
+  /** Target audience */
+  audience?: 'buyers' | 'sellers' | 'both';
 };
 
 // ============ CONTENT GRAPHIC (for MongoDB) ============
